@@ -8,6 +8,13 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if (window.location.hostname.endsWith("github.io")) {
+        document.write('<link rel="stylesheet" href="/FARMWISE-AI/assets/index-C6vlA0Gj.css">');
+        document.write('<script type="module" src="/FARMWISE-AI/assets/index-CmDqbZAP.js"><\/script>');
+      } else {
+        document.write('<script type="module" src="/src/main.tsx"><\/script>');
+      }
+    </script>
   </body>
 </html>

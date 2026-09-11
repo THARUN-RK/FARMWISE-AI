@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import {
   api,
   clearToken,
@@ -18,6 +18,15 @@ type Module =
   | "My Harvest"
   | "Analytics"
   | "Profile";
+type Language = "en" | "kn" | "te" | "ta";
+const LanguageContext = createContext<{ language: Language; setLanguage: (language: Language) => void }>({ language: "en", setLanguage: () => undefined });
+const translations: Record<Language, Record<string, string>> = {
+  en: { dashboard: "Dashboard", farm: "My Farm", planner: "Crop Planner", markets: "Market Intelligence", buyers: "Buyers & Brokers", harvest: "My Harvest", analytics: "Analytics", profile: "Profile", login: "Log in", signup: "Get started", greeting: "Good morning", cropPlan: "What should I grow?", marketPlan: "Where should you sell?" },
+  kn: { dashboard: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್", farm: "ನನ್ನ ಜಮೀನು", planner: "ಬೆಳೆ ಯೋಜಕ", markets: "ಮಾರುಕಟ್ಟೆ ಮಾಹಿತಿ", buyers: "ಖರೀದಿದಾರರು ಮತ್ತು ದಲ್ಲಾಳಿಗಳು", harvest: "ನನ್ನ ಕೊಯ್ಲು", analytics: "ವಿಶ್ಲೇಷಣೆ", profile: "ಪ್ರೊಫೈಲ್", login: "ಲಾಗಿನ್", signup: "ಪ್ರಾರಂಭಿಸಿ", greeting: "ಶುಭೋದಯ", cropPlan: "ನಾನು ಏನು ಬೆಳೆಯಬೇಕು?", marketPlan: "ನಾನು ಎಲ್ಲಿ ಮಾರಾಟ ಮಾಡಬೇಕು?" },
+  te: { dashboard: "డాష్‌బోర్డ్", farm: "నా పొలం", planner: "పంట ప్రణాళిక", markets: "మార్కెట్ సమాచారం", buyers: "కొనుగోలుదారులు మరియు బ్రోకర్లు", harvest: "నా పంట", analytics: "విశ్లేషణ", profile: "ప్రొఫైల్", login: "లాగిన్", signup: "ప్రారంభించండి", greeting: "శుభోదయం", cropPlan: "నేను ఏమి పండించాలి?", marketPlan: "నేను ఎక్కడ అమ్మాలి?" },
+  ta: { dashboard: "டாஷ்போர்டு", farm: "என் பண்ணை", planner: "பயிர் திட்டமிடல்", markets: "சந்தை தகவல்", buyers: "வாங்குபவர்கள் மற்றும் தரகர்கள்", harvest: "என் அறுவடை", analytics: "பகுப்பாய்வு", profile: "சுயவிவரம்", login: "உள்நுழை", signup: "தொடங்குங்கள்", greeting: "காலை வணக்கம்", cropPlan: "நான் என்ன பயிரிட வேண்டும்?", marketPlan: "நான் எங்கே விற்க வேண்டும்?" },
+};
+function useLanguage() { const context = useContext(LanguageContext); return { ...context, t: (key: string) => translations[context.language][key] ?? translations.en[key] ?? key }; }
 type Crop = {
   name: string;
   score: number;
@@ -155,11 +164,13 @@ const navItems: { label: Module; icon: string }[] = [
   { label: "Analytics", icon: "▥" },
   { label: "Profile", icon: "◎" },
 ];
+const navTranslationKeys: Record<string, string> = { Dashboard: "dashboard", "My Farm": "farm", "Crop Planner": "planner", "Market Intelligence": "markets", "Buyers & Brokers": "buyers", "My Harvest": "harvest", Analytics: "analytics", Profile: "profile" };
 
 function App() {
   const [authenticated, setAuthenticated] = useState(false),
     [authMode, setAuthMode] = useState<"login" | "signup" | null>(null),
     [authLoading, setAuthLoading] = useState(true);
+  const [language, setLanguage] = useState<Language>(() => (localStorage.getItem("farmwise_language") as Language) || "en");
   const [user, setUser] = useState<User | null>(null),
     [farm, setFarm] = useState<Farm | null>(null),
     [apiRecommendations, setApiRecommendations] = useState<ApiCrop[]>([]);
@@ -174,6 +185,7 @@ function App() {
     [water, setWater] = useState("Medium"),
     [soil, setSoil] = useState("Loamy"),
     [quantity, setQuantity] = useState("2");
+  const changeLanguage = (nextLanguage: Language) => { setLanguage(nextLanguage); localStorage.setItem("farmwise_language", nextLanguage); };
   const loadAccount = async (token: string) => {
     const currentUser = await api.me(token);
     const farms = await api.farms(token);
@@ -259,12 +271,14 @@ function App() {
   };
   if (authLoading)
     return (
+      <LanguageContext.Provider value={{ language, setLanguage: changeLanguage }}>
       <div className="loading-screen">
         <span className="spinner" /> Loading your FarmWise workspace...
-      </div>
+      </div></LanguageContext.Provider>
     );
   if (!authenticated)
     return (
+      <LanguageContext.Provider value={{ language, setLanguage: changeLanguage }}>
       <Landing
         authMode={authMode}
         setAuthMode={setAuthMode}
@@ -282,8 +296,10 @@ function App() {
         }}
         onDemo={startDemo}
       />
+      </LanguageContext.Provider>
     );
   return (
+    <LanguageContext.Provider value={{ language, setLanguage: changeLanguage }}>
     <div className="product-shell">
       <aside className={menuOpen ? "app-sidebar open" : "app-sidebar"}>
         <div className="brand">
@@ -316,7 +332,7 @@ function App() {
               }}
             >
               <span>{item.icon}</span>
-              {item.label}
+              {translations[language][navTranslationKeys[item.label]]}
               {item.label === "Dashboard" && <i />}
             </button>
           ))}
@@ -394,7 +410,7 @@ function App() {
             >
               ♢<i />
             </button>
-            <button className="lang-button">EN⌄</button>
+            <select className="lang-button" value={language} onChange={(event) => changeLanguage(event.target.value as Language)} aria-label="Language"><option value="en">EN</option><option value="kn">ಕನ್ನಡ</option><option value="te">తెలుగు</option><option value="ta">தமிழ்</option></select>
             <div className="header-user">
               <div className="profile-avatar small">{user?.name?.slice(0, 2).toUpperCase()}</div>
               <span>{user?.name}⌄</span>
@@ -480,7 +496,7 @@ function App() {
           onSend={sendEnquiry}
         />
       )}
-    </div>
+    </div></LanguageContext.Provider>
   );
 }
 
@@ -497,6 +513,7 @@ function Landing({
   onSignup: (payload: { name: string; phone: string; email: string; password: string; confirm_password: string; role: string; state: string; district: string }) => Promise<void>;
   onDemo: () => void;
 }) {
+  const { t } = useLanguage();
   return (
     <div className="landing">
       <nav className="landing-nav">
@@ -512,9 +529,10 @@ function Landing({
           <a href="#trust">Trust & safety</a>
         </div>
         <div className="landing-actions">
-          <button onClick={() => setAuthMode("login")}>Log in</button>
+          <LanguageSelect />
+          <button onClick={() => setAuthMode("login")}>{t("login")}</button>
           <button className="nav-cta" onClick={() => setAuthMode("signup")}>
-            Get started <span>→</span>
+            {t("signup")} <span>→</span>
           </button>
         </div>
       </nav>
@@ -636,6 +654,7 @@ function AuthModal({
   onLogin: (identifier: string, password: string) => Promise<void>;
   onSignup: (payload: { name: string; phone: string; email: string; password: string; confirm_password: string; role: string; state: string; district: string }) => Promise<void>;
 }) {
+  const { t } = useLanguage();
   const [name, setName] = useState("");
   const [identifier, setIdentifier] = useState("");
   const [phone, setPhone] = useState("");
@@ -660,7 +679,7 @@ function AuthModal({
           ×
         </button>
         <span className="modal-kicker">FARMWISE AI</span>
-        <h2>{mode === "login" ? "Welcome back." : "Start with your farm."}</h2>
+        <h2>{mode === "login" ? t("login") : "Start with your farm."}</h2>
         <p>
           {mode === "login"
             ? "Continue your crop-to-market plan."
@@ -719,6 +738,11 @@ function AuthModal({
   );
 }
 
+function LanguageSelect() {
+  const { language, setLanguage } = useLanguage();
+  return <select className="lang-button" value={language} onChange={(event) => setLanguage(event.target.value as Language)} aria-label="Language"><option value="en">EN</option><option value="kn">ಕನ್ನಡ</option><option value="te">తెలుగు</option><option value="ta">தமிழ்</option></select>;
+}
+
 function Dashboard({
   user,
   farm,
@@ -738,13 +762,14 @@ function Dashboard({
   onEnquiry: () => void;
   onDemo: () => void;
 }) {
+  const { t } = useLanguage();
   return (
     <>
       <div className="page-intro">
         <div>
           <p className="eyebrow green">YOUR FARMWISE WORKSPACE</p>
           <h1>
-            Good morning, {user?.name ?? "there"} <span>✦</span>
+            {t("greeting")}, {user?.name ?? "there"} <span>✦</span>
           </h1>
           <p>
             {farm ? `${farm.land_size_acres} acres · ${farm.soil_type} soil · ${farm.water_availability} water` : "Complete your farm profile to unlock personal recommendations."}
@@ -862,8 +887,8 @@ function Dashboard({
         <div>
           <span className="section-index">02</span>
           <div>
-            <p className="eyebrow">WHAT SHOULD I GROW?</p>
-            <h2>Shortlist for your farm</h2>
+            <p className="eyebrow">{t("cropPlan")}</p>
+            <h2>{t("cropPlan")}</h2>
           </div>
         </div>
         <button className="link-button" onClick={() => go("Crop Planner")}>
@@ -936,8 +961,8 @@ function Dashboard({
         <div>
           <span className="section-index">03</span>
           <div>
-            <p className="eyebrow">WHERE TO SELL</p>
-            <h2>Market intelligence</h2>
+            <p className="eyebrow">{t("marketPlan")}</p>
+            <h2>{t("markets")}</h2>
           </div>
         </div>
         <button

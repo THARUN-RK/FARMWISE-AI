@@ -38,14 +38,19 @@ async function request<T>(
   options: RequestInit = {},
   token?: string,
 ): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers ?? {}),
-    },
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers ?? {}),
+      },
+    });
+  } catch {
+    throw new Error("FarmWise API is not reachable. Start the backend locally or configure VITE_API_URL for the deployed app.");
+  }
   const body = await response.json().catch(() => ({}));
   if (!response.ok)
     throw new Error(
@@ -79,9 +84,9 @@ export const api = {
     }),
   me: (token: string) => request<User>("/auth/me", {}, token),
   updateProfile: (payload: { name: string; language: string; location_name?: string | null; state?: string | null; district?: string | null }, token: string) => request<User>("/farmers/profile", { method: "PUT", body: JSON.stringify(payload) }, token),
-    farms: (token: string) => request<Farm[]>("/farms", {}, token),
-    createFarm: (payload: Omit<Farm, 'id'>, token: string) => request<Farm>('/farms', { method: 'POST', body: JSON.stringify(payload) }, token),
-    updateFarm: (id: number, payload: Omit<Farm, 'id'>, token: string) => request<Farm>(`/farms/${id}`, { method: 'PUT', body: JSON.stringify(payload) }, token),
+  farms: (token: string) => request<Farm[]>("/farms", {}, token),
+  createFarm: (payload: Omit<Farm, "id">, token: string) => request<Farm>("/farms", { method: "POST", body: JSON.stringify(payload) }, token),
+  updateFarm: (id: number, payload: Omit<Farm, "id">, token: string) => request<Farm>(`/farms/${id}`, { method: "PUT", body: JSON.stringify(payload) }, token),
   recommendations: (farmId: number, token: string) =>
     request<{ recommendations: ApiCrop[] }>(
       `/recommendations/crops`,

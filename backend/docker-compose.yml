@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: farmwise
+      POSTGRES_USER: farmwise
+      POSTGRES_PASSWORD: farmwise
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U farmwise -d farmwise"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  backend:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://farmwise:farmwise@postgres:5432/farmwise
+      JWT_SECRET: change-this-in-production
+      CORS_ORIGINS: http://localhost:5173
+      DEMO_DATA: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+volumes:
+  postgres_data:

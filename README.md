@@ -45,4 +45,15 @@ The frontend Demo Mode works without the backend. Real login, personalized farm 
 
 The frontend deploys through `.github/workflows/deploy-pages.yml`. The backend requires a separate Python hosting target such as Azure Container Apps, Render, Railway, or a VPS with PostgreSQL.
 
+### Deploy the backend on Render
+
+1. Create a new Render Blueprint from this repository.
+2. Select `backend/render.yaml`.
+3. Wait for the web service and PostgreSQL database to become healthy.
+4. Copy the API URL, for example `https://farmwise-ai-api.onrender.com`.
+5. Set the GitHub repository variable `VITE_API_URL` to `https://farmwise-ai-api.onrender.com/api/v1`.
+6. Run the Pages workflow again.
+
+Until this is configured, signup and login work only when the local FastAPI server is running. Demo Mode does not need the backend.
+
 All market, buyer, weather, and financial values in demo mode are clearly labeled estimates or simulated data.

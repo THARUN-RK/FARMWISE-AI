@@ -45,6 +45,8 @@ The frontend Demo Mode works without the backend. Real login, personalized farm 
 
 The frontend deploys through `.github/workflows/deploy-pages.yml`. The backend requires a separate Python hosting target such as Azure Container Apps, Render, Railway, or a VPS with PostgreSQL.
 
+If the Pages settings are using branch deployment instead of Actions, set **Settings -> Pages -> Deploy from a branch -> `main` -> `/docs`**. The compiled frontend artifact is committed in `docs/`; do not select `/ (root)`, because the root `index.html` is the Vite development entry and will request `/src/main.tsx`.
+
 ### Deploy the backend on Render
 
 1. Create a new Render Blueprint from this repository.

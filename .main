@@ -1,0 +1,6 @@
+git checkout -b production-hardening
+curl -L -o farmwise-hardening.patch <download-link-you-just-got>   # or drag the file into the repo folder
+git apply farmwise-hardening.patch
+git add -A
+git commit -m "Add real weather/AI assistant/disease detection, fix admin privilege escalation, add rate limiting + security headers"
+git push origin production-hardening

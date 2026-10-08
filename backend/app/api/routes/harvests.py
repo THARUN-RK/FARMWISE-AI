@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import current_user, farmer_only
 from app.core.database import get_db
-from app.models.entities import Crop, Harvest
+from app.models.entities import Crop, CropListing, Harvest
 from app.schemas.common import HarvestCreate
 
 log = logging.getLogger("farmwise.harvests")
@@ -41,15 +41,19 @@ def create_harvest(
     harvest = Harvest(
         farmer_id=user.id,
         harvest_date=harvest_date,
-        **body.model_dump(exclude={"harvest_date"}),
+        **body.model_dump(exclude={"harvest_date", "photo_data_url"}),
     )
     db.add(harvest)
+    if body.photo_data_url:
+        db.flush()
+        db.add(CropListing(harvest_id=harvest.id, photo_data_url=body.photo_data_url))
     db.commit()
     db.refresh(harvest)
     log.info("create_harvest farmer_id=%s harvest_id=%s", user.id, harvest.id)
     return _response(
         {"id": harvest.id, "crop_id": harvest.crop_id, "quantity_tonnes": harvest.quantity_tonnes,
-         "grade": harvest.grade, "harvest_date": str(harvest.harvest_date)},
+         "grade": harvest.grade, "harvest_date": str(harvest.harvest_date),
+         "is_listed": bool(body.photo_data_url)},
         "Harvest recorded",
     )
 
@@ -57,11 +61,31 @@ def create_harvest(
 @router.get("")
 def list_harvests(user=Depends(current_user), db: Session = Depends(get_db)):
     """List all harvests for the authenticated farmer."""
-    harvests = db.scalars(select(Harvest).where(Harvest.farmer_id == user.id)).all()
+    rows = db.execute(
+        select(Harvest, Crop)
+        .join(Crop, Crop.id == Harvest.crop_id)
+        .where(Harvest.farmer_id == user.id)
+        .order_by(Harvest.harvest_date.desc())
+    ).all()
+    harvests = [harvest for harvest, _ in rows]
+    listings = {
+        listing.harvest_id: listing
+        for listing in db.scalars(
+            select(CropListing).where(CropListing.harvest_id.in_([h.id for h in harvests]))
+        ).all()
+    } if harvests else {}
     return _response(
         [
-            {"id": h.id, "crop_id": h.crop_id, "quantity_tonnes": h.quantity_tonnes,
-             "grade": h.grade, "harvest_date": str(h.harvest_date), "notes": h.notes}
-            for h in harvests
+            {
+                "id": harvest.id,
+                "crop_id": harvest.crop_id,
+                "crop": crop.name,
+                "quantity_tonnes": harvest.quantity_tonnes,
+                "grade": harvest.grade,
+                "harvest_date": str(harvest.harvest_date),
+                "notes": harvest.notes,
+                "is_listed": harvest.id in listings,
+            }
+            for harvest, crop in rows
         ]
     )

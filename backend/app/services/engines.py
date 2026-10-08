@@ -53,3 +53,81 @@ class BuyerMatchingService:
 def calculate_profit(data: dict) -> dict:
     revenue = data["expected_yield"] * data["selling_price"]; profit = revenue - data["production_cost"] - data["transport_cost"] - data["market_charges"]
     return {"crop": data["crop"], "revenue": round(revenue, 2), "production_cost": data["production_cost"], "transport_cost": data["transport_cost"], "market_charges": data["market_charges"], "estimated_profit": round(profit, 2), "profit_per_acre": round(profit / data["land_size"], 2), "net_realization_per_kg": round(profit / data["expected_yield"], 2)}
+
+
+class FinancialForecastService:
+    @staticmethod
+    def forecast(db: Session, crop: Crop, farm: Farm) -> dict:
+        acres = farm.land_size_acres
+        unit_cost = crop.base_production_cost_per_acre
+        unit_yield = crop.expected_yield_per_acre
+        production_cost = round(unit_cost * acres, 2)
+        expected_yield = round(unit_yield * acres, 2)
+        market_prices = db.scalars(
+            select(MarketPrice)
+            .where(MarketPrice.crop_id == crop.id)
+            .order_by(MarketPrice.date.desc(), MarketPrice.id.desc())
+        ).all()
+        latest_by_market = {}
+        for price in market_prices:
+            latest_by_market.setdefault(price.market_id, price)
+        observed_prices = [price.price_per_kg for price in latest_by_market.values()]
+        if observed_prices:
+            expected_price = sum(observed_prices) / len(observed_prices)
+            low_price = min(observed_prices) * 0.9
+            high_price = max(observed_prices) * 1.1
+            confidence = "medium"
+            price_source = f"Latest recorded demo market quotes from {len(observed_prices)} markets"
+        else:
+            expected_price = max(1.0, unit_cost / max(unit_yield, 1) * 1.35)
+            low_price = expected_price * 0.8
+            high_price = expected_price * 1.15
+            confidence = "low"
+            price_source = "No crop quotes are available; price is a cost-based planning assumption, not a market quote"
+
+        transport_per_kg = 1.5
+        market_charges_per_kg = 0.4
+        scenarios = {}
+        for name, yield_factor, price in (
+            ("low", 0.9, low_price),
+            ("expected", 1.0, expected_price),
+            ("high", 1.1, high_price),
+        ):
+            scenario_yield = expected_yield * yield_factor
+            gross_revenue = scenario_yield * price
+            transport_cost = scenario_yield * transport_per_kg
+            charges = scenario_yield * market_charges_per_kg
+            total_cost = production_cost + transport_cost + charges
+            net_profit = gross_revenue - total_cost
+            scenarios[name] = {
+                "expected_yield_kg": round(scenario_yield, 2),
+                "price_per_kg": round(price, 2),
+                "gross_revenue": round(gross_revenue, 2),
+                "production_cost": production_cost,
+                "transport_cost": round(transport_cost, 2),
+                "market_charges": round(charges, 2),
+                "total_cost": round(total_cost, 2),
+                "profit_or_loss": round(net_profit, 2),
+            }
+
+        expected = scenarios["expected"]
+        return {
+            "crop": crop.name,
+            "farm_acres": acres,
+            "available_budget": farm.budget,
+            "production_budget_required": production_cost,
+            "budget_after_production": round(farm.budget - production_cost, 2),
+            "budget_status": "sufficient" if farm.budget >= production_cost else "shortfall",
+            "expected_yield_per_acre_kg": unit_yield,
+            "scenarios": scenarios,
+            "expected_profit_or_loss_per_acre": round(expected["profit_or_loss"] / acres, 2),
+            "confidence": confidence,
+            "price_source": price_source,
+            "assumptions": {
+                "transport_cost_per_kg": transport_per_kg,
+                "market_charges_per_kg": market_charges_per_kg,
+                "production_cost_source": "Seeded crop production cost; verify with current local input prices",
+                "price_source": price_source,
+                "model": "Explainable low/expected/high scenario baseline; not a trained yield or price guarantee",
+            },
+        }

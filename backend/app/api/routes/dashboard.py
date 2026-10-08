@@ -6,15 +6,15 @@ farmer's farm and harvest data rather than hardcoded demo values.
 """
 import logging
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.deps import current_user, farmer_only
 from app.core.database import get_db
-from app.models.entities import Buyer, Enquiry, Farm, Farmer, Harvest, Recommendation
-from app.schemas.common import ProfitRequest
-from app.services.engines import calculate_profit
+from app.models.entities import Buyer, Crop, Enquiry, Farm, Farmer, Harvest, Recommendation
+from app.schemas.common import FinancialForecastRequest, ProfitRequest
+from app.services.engines import FinancialForecastService, calculate_profit
 
 log = logging.getLogger("farmwise.dashboard")
 router = APIRouter(tags=["dashboard"])
@@ -94,6 +94,25 @@ def impact(user=Depends(farmer_only), db: Session = Depends(get_db)):
 def profit_calculate(body: ProfitRequest):
     """Calculate estimated profit from supplied inputs."""
     return _response(calculate_profit(body.model_dump()), "Profit calculated from supplied estimates")
+
+
+@router.post("/dashboard/financial-forecast")
+def financial_forecast(
+    body: FinancialForecastRequest,
+    user=Depends(farmer_only),
+    db: Session = Depends(get_db),
+):
+    farm_query = select(Farm).where(Farm.farmer_id == user.id)
+    if body.farm_id:
+        farm_query = farm_query.where(Farm.id == body.farm_id)
+    farm = db.scalar(farm_query)
+    if not farm:
+        raise HTTPException(404, "Save a farm profile before requesting a financial forecast")
+    crop = db.get(Crop, body.crop_id)
+    if not crop:
+        raise HTTPException(404, "Crop not found")
+    forecast = FinancialForecastService.forecast(db, crop, farm)
+    return _response(forecast, "Budget and profit/loss scenarios estimated")
 
 
 @router.get("/admin/analytics")

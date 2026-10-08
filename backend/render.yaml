@@ -15,6 +15,12 @@ services:
       - key: JWT_SECRET
         generateValue: true
 
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+
+      - key: GOOGLE_TRANSLATE_API_KEY
+        sync: false
+
       - key: JWT_ALGORITHM
         value: HS256
 

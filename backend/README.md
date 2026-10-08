@@ -37,18 +37,45 @@ The container API is available at `http://localhost:8000`. Set `DATABASE_URL` an
 - `POST /api/v1/recommendations/crops`
 - `GET /api/v1/recommendations/sowing-window/{crop_id}`
 - `POST /api/v1/harvests`
+- `GET /api/v1/harvests` (the farmer's harvests and listing status)
+- `GET /api/v1/crops` (crop choices for harvest forms)
+- `GET /api/v1/marketplace/listings` (authenticated crop photo/video listings without private contact details)
+- `GET /api/v1/buyers` (buyer directory with public business/profile details)
+- `GET|POST /api/v1/conversations`, `POST /api/v1/conversations/{id}/messages` (participant-only messaging with per-account contact/location consent)
 - `GET /api/v1/markets`, `GET /api/v1/markets/prices`, `POST /api/v1/markets/recommend`
 - `POST /api/v1/buyers/match`
 - `POST|GET /api/v1/enquiries`, `PATCH /api/v1/enquiries/{id}/status`
 - `POST /api/v1/profit/calculate`
+- `POST /api/v1/dashboard/financial-forecast` (farmer-only low/expected/high budget and profit/loss scenarios)
+- `GET /api/v1/translate/interface-strings/{language}` (fetch interface translations for a language from Google Cloud Translation API)
 - `GET /api/v1/weather/current`, `GET /api/v1/alerts`, `GET /api/v1/dashboard/impact`
 - `GET /api/v1/admin/analytics`
 
 All success payloads follow `{ success, data, message }`; validation and domain errors use FastAPI HTTP status codes.
 
+To share crop media, include `photo_data_url` as a base64 JPEG, PNG, WebP, MP4,
+WebM, or QuickTime/MOV data URL in `POST /api/v1/harvests`. Decoded media is
+limited to 10 MB. Listings do not disclose phone, email, or precise coordinates.
+Each conversation participant independently chooses whether to share contact
+details and saved location.
+
 ## Demo credentials
 
 After seeding: phone `+919999999999`, password `DemoPass123!`. This account is for local demonstration only.
+
+Google sign-in requires `GOOGLE_CLIENT_ID` to contain the same OAuth Web client
+ID used by the frontend. The backend verifies Google ID-token signatures and
+audience before creating or authenticating an account. New Google accounts
+must supply a unique phone number.
+
+To enable translation for supported language codes, set
+`GOOGLE_TRANSLATE_API_KEY` to a Google Cloud Translation API key in the backend
+environment (keep it secret; never commit it). The endpoint translates only a
+fixed set of interface strings; it does not localize every screen, and some
+scheduled-language codes are mapped to a nearby language or left in English.
+User data (crop notes, profiles, private messages) is never sent for translation.
+If translation is requested without a configured key or the provider fails, the
+endpoint returns an error rather than claiming English text was translated.
 
 Example:
 
@@ -70,4 +97,4 @@ Run tests with:
 
 ## Known limitations
 
-Weather is a mock provider, the forecast endpoint is intentionally not exposed until historical-data validation is added, and market/buyer records are simulated. Add a real weather adapter, Alembic environment, role-specific buyer/admin workflows, rate limiting, structured JSON logging, and live data provenance before production deployment.
+Weather is a mock provider, market/buyer records may be simulated, and the financial forecast is an explainable scenario baseline rather than a trained predictive model. Add a real weather adapter, Alembic environment, rate limiting, structured JSON logging, and live data provenance before production deployment.

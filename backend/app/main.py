@@ -24,6 +24,7 @@ from app.api.routes import (
     farms,
     harvests,
     markets,
+    translate,
     weather,
 )
 from app.core.config import settings
@@ -108,18 +109,22 @@ app.include_router(auth.router, prefix=PREFIX)
 # Farms
 app.include_router(
     farms.router,
-    prefix=f"{PREFIX}/farms",
+    prefix=PREFIX,
 )
 
 # Harvests
 app.include_router(
     harvests.router,
-    prefix=f"{PREFIX}/harvests",
+    prefix=PREFIX,
 )
 
 # Crops
 app.include_router(
     crops.router,
+    prefix=PREFIX,
+)
+app.include_router(
+    crops.catalog_router,
     prefix=PREFIX,
 )
 
@@ -147,12 +152,18 @@ app.include_router(
     prefix=PREFIX,
 )
 
+# Translation
+app.include_router(
+    translate.router,
+    prefix=PREFIX,
+)
+
 
 # ── Backward-compatible farmer profile routes ─────────────────────────────────
 # The original /api/v1/farmers/profile routes are kept for compatibility.
 
 app.include_router(
-    auth.router,
+    auth.profile_router,
     prefix=f"{PREFIX}/farmers",
     include_in_schema=False,
 )

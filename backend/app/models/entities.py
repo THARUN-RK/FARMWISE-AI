@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
@@ -121,6 +121,35 @@ class Harvest(Base):
     grade: Mapped[str] = mapped_column(String(20))
     harvest_date: Mapped[date] = mapped_column(Date)
     notes: Mapped[str | None] = mapped_column(Text)
+
+class CropListing(Base):
+    __tablename__ = "crop_listings"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    harvest_id: Mapped[int] = mapped_column(ForeignKey("harvests.id"), unique=True, index=True)
+    photo_data_url: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class Conversation(Base):
+    __tablename__ = "conversations"
+    __table_args__ = (UniqueConstraint("listing_id", "buyer_user_id", name="uq_conversation_listing_buyer"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    listing_id: Mapped[int] = mapped_column(ForeignKey("crop_listings.id"), index=True)
+    farmer_id: Mapped[int] = mapped_column(ForeignKey("farmers.id"), index=True)
+    buyer_user_id: Mapped[int] = mapped_column(ForeignKey("farmers.id"), index=True)
+    farmer_shares_contact: Mapped[bool] = mapped_column(Boolean, default=False)
+    farmer_shares_location: Mapped[bool] = mapped_column(Boolean, default=False)
+    buyer_shares_contact: Mapped[bool] = mapped_column(Boolean, default=False)
+    buyer_shares_location: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class ConversationMessage(Base):
+    __tablename__ = "conversation_messages"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    conversation_id: Mapped[int] = mapped_column(ForeignKey("conversations.id"), index=True)
+    sender_id: Mapped[int] = mapped_column(ForeignKey("farmers.id"), index=True)
+    body: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 class Recommendation(Base):
     __tablename__ = "recommendations"

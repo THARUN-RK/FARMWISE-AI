@@ -4,6 +4,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     database_url: str = "sqlite:///./farmwise.db"
     jwt_secret: str = "dev-only-change-me"
+    google_client_id: str = ""
+    google_translate_api_key: str = ""
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173,https://tharun-rk.github.io"

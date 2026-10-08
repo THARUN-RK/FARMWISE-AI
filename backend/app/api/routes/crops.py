@@ -20,10 +20,18 @@ from app.services.engines import CropRecommendationService
 
 log = logging.getLogger("farmwise.crops")
 router = APIRouter(prefix="/recommendations", tags=["recommendations"])
+catalog_router = APIRouter(prefix="/crops", tags=["crops"])
 
 
 def _response(data, message: str = ""):
     return {"success": True, "data": data, "message": message}
+
+
+@catalog_router.get("")
+def list_crops(db: Session = Depends(get_db)):
+    """List crop choices for recording a harvest."""
+    crops = db.scalars(select(Crop).order_by(Crop.name)).all()
+    return _response([{"id": crop.id, "name": crop.name} for crop in crops])
 
 
 @router.post("/crops")

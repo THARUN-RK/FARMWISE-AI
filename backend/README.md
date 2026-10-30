@@ -24,6 +24,8 @@ Swagger is available at `http://localhost:8000/docs`; OpenAPI JSON is at `/opena
 
 ```powershell
 cd backend
+# Copy .env.example to .env, then set a strong JWT_SECRET. For Google sign-in,
+# set GOOGLE_CLIENT_ID to the same value used by the frontend.
 docker compose up --build
 ```
 
@@ -66,7 +68,8 @@ After seeding: phone `+919999999999`, password `DemoPass123!`. This account is f
 Google sign-in requires `GOOGLE_CLIENT_ID` to contain the same OAuth Web client
 ID used by the frontend. The backend verifies Google ID-token signatures and
 audience before creating or authenticating an account. New Google accounts
-must supply a unique phone number.
+must supply a unique phone number. When using Docker Compose, put this value in
+`backend/.env`; Compose passes it to the backend container.
 
 To enable translation for supported language codes, set
 `GOOGLE_TRANSLATE_API_KEY` to a Google Cloud Translation API key in the backend

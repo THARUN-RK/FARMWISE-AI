@@ -18,8 +18,12 @@ services:
     build: .
     environment:
       DATABASE_URL: postgresql+psycopg://farmwise:farmwise@postgres:5432/farmwise
-      JWT_SECRET: change-this-in-production
-      CORS_ORIGINS: http://localhost:5173
+      # Values in .env are used by Docker Compose for interpolation.  Do not
+      # bake credentials into the image or commit them to this file.
+      JWT_SECRET: ${JWT_SECRET:-change-this-in-production}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_TRANSLATE_API_KEY: ${GOOGLE_TRANSLATE_API_KEY:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       DEMO_DATA: "true"
     ports:
       - "8000:8000"

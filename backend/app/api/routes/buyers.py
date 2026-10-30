@@ -119,6 +119,21 @@ def list_buyers(db: Session = Depends(get_db)):
     return _response(directory)
 
 
+@router.get("/directory")
+def list_people_directory(db: Session = Depends(get_db)):
+    """List account names and broad locations by role; never expose contact details."""
+    accounts = db.scalars(select(Farmer).where(Farmer.role.in_(("farmer", "buyer"))).order_by(Farmer.name)).all()
+    return _response([
+        {
+            "id": account.id,
+            "name": account.name,
+            "type": account.role,
+            "location": ", ".join(part for part in (account.district, account.state) if part) or account.location_name or "Location not provided",
+        }
+        for account in accounts
+    ])
+
+
 @router.get("/marketplace/listings")
 def list_crop_listings(user=Depends(current_user), db: Session = Depends(get_db)):
     """Show crop media listings without disclosing private farmer contacts."""

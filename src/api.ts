@@ -143,6 +143,8 @@ export type BuyerProfile = {
   email?: string | null;
 };
 
+export type DirectoryProfile = { id: number; name: string; type: "farmer" | "buyer"; location: string };
+
 export type AccountAlert = {
   type: string;
   severity: string;
@@ -267,6 +269,7 @@ export const api = {
       "/markets",
     ),
   buyers: () => request<BuyerProfile[]>("/buyers"),
+  directory: () => request<DirectoryProfile[]>("/directory"),
   getInterfaceTranslations: (language: string) =>
     request<Record<string, string>>(`/translate/interface-strings/${language}`),
 };

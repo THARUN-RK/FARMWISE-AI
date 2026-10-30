@@ -9,6 +9,7 @@ import {
   type BuyerProfile,
   type CropListing,
   type CropOption,
+  type DirectoryProfile,
   type Conversation,
   type FinancialForecast,
   type Farm,
@@ -609,6 +610,7 @@ function App() {
               token={getToken()}
               demo={demo}
               role="farmer"
+              onCreateProfile={() => setActive("Profile")}
               onContact={startContact}
             />
           )}
@@ -618,6 +620,7 @@ function App() {
               demo={demo}
               role={user?.role === "buyer" ? "buyer" : "farmer"}
               currentUserId={user?.id}
+              onCreateProfile={() => setActive("Profile")}
               onContact={startContact}
             />
           )}
@@ -1807,15 +1810,18 @@ function BuyerView({
   demo,
   role,
   currentUserId,
+  onCreateProfile,
   onContact,
 }: {
   token: string | null;
   demo: boolean;
   role: "farmer" | "buyer";
   currentUserId?: number;
+  onCreateProfile: () => void;
   onContact: (intent: { listingId?: number; buyerUserId?: number }) => void;
 }) {
   const [directory, setDirectory] = useState<BuyerProfile[]>([]);
+  const [people, setPeople] = useState<DirectoryProfile[]>([]);
   const [listings, setListings] = useState<CropListing[]>([]);
   const [loading, setLoading] = useState(Boolean(token) && !demo);
   const [error, setError] = useState("");
@@ -1827,11 +1833,12 @@ function BuyerView({
     }
     let cancelled = false;
     setLoading(true);
-    Promise.all([api.buyers(), api.cropListings(token)])
-      .then(([buyerResults, listingResults]) => {
+    Promise.all([api.buyers(), api.cropListings(token), api.directory()])
+      .then(([buyerResults, listingResults, peopleResults]) => {
         if (cancelled) return;
         setDirectory(buyerResults);
         setListings(listingResults);
+        setPeople(peopleResults);
         setError("");
       })
       .catch((loadError) => {
@@ -1859,6 +1866,10 @@ function BuyerView({
     email: `buyer${index + 1}@demo.farmwise`,
   }));
   const visibleBuyers = demo ? demoDirectory : directory.filter((buyer) => buyer.account_id);
+  const farmerDirectory = demo
+    ? [{ id: -1, name: "Ravi Kumar", location: "Guntur, Andhra Pradesh", crops: "Tomato, chilli" }]
+    : people.filter((person) => person.type === "farmer").map((person) => ({ ...person, crops: Array.from(new Set(listings.filter((listing) => listing.farmer.account_id === person.id).map((listing) => listing.crop))).join(", ") }));
+  const [directoryType, setDirectoryType] = useState<"all" | "farmer" | "buyer">("all");
   const visibleListings = listings.filter((listing) =>
     role === "farmer" || listing.farmer.account_id !== currentUserId,
   );
@@ -1872,6 +1883,22 @@ function BuyerView({
           ? "Browse crop photos and videos, then message a farmer. Their phone, email, and location are shared only with their permission."
           : "Browse local crops and message registered buyers. Contact details and precise location stay private unless you choose to share them in a conversation."}
       />
+      {role === "farmer" && <section className="people-directory panel">
+        <div className="marketplace-section-heading">
+          <div><span className="eyebrow green">COMMUNITY DIRECTORY</span><h2>Farmers, buyers & brokers</h2></div>
+          <button className="primary-button" onClick={onCreateProfile}>Create your profile</button>
+        </div>
+        <p className="directory-intro">Find people by role. Create an account and complete your profile to join the FarmWise community.</p>
+        <div className="directory-filters" role="group" aria-label="Filter people by type">
+          {(["all", "farmer", "buyer"] as const).map((type) => <button key={type} className={directoryType === type ? "active" : ""} onClick={() => setDirectoryType(type)}>{type === "all" ? "Everyone" : type === "farmer" ? "Farmers" : "Buyers & brokers"}</button>)}
+        </div>
+        <div className="people-directory-grid">
+          {(directoryType !== "buyer" ? farmerDirectory.map((farmer) => ({ id: `farmer-${farmer.id}`, name: farmer.name, type: "Farmer", location: farmer.location, detail: farmer.crops })) : []).map((person) => <article className="person-card" key={person.id}><span className="person-avatar">{person.name.slice(0, 2).toUpperCase()}</span><div><span className="person-role">{person.type}</span><h3>{person.name}</h3><p>{person.location}</p><small>{person.detail ? `Growing: ${person.detail}` : "FarmWise farmer"}</small></div></article>)}
+          {(directoryType !== "farmer" ? visibleBuyers.map((buyer) => ({ id: `buyer-${buyer.id}`, name: buyer.name, type: buyer.business_type, location: buyer.location_name, detail: buyer.verification_status === "verified" ? "Verified business" : "Buyer / broker account" })) : []).map((person) => <article className="person-card" key={person.id}><span className="person-avatar buyer">{person.name.slice(0, 2).toUpperCase()}</span><div><span className="person-role">{person.type}</span><h3>{person.name}</h3><p>{person.location}</p><small>{person.detail}</small></div></article>)}
+          {!loading && !farmerDirectory.length && directoryType !== "buyer" && <p className="empty-state">Farmer profiles will appear here when they share a crop listing.</p>}
+          {!loading && !visibleBuyers.length && directoryType !== "farmer" && <p className="empty-state">Buyer and broker profiles will appear here after they create an account.</p>}
+        </div>
+      </section>}
       {error && <div className="marketplace-error">{error}</div>}
       <div className={`marketplace-columns ${role === "buyer" ? "buyer-marketplace-only" : ""}`}>
         <section className="marketplace-column">

@@ -90,14 +90,22 @@ const marketplacePageTranslations: Partial<Record<Language, Record<string, strin
   te: { onlineMarketplaces: "ఆన్‌లైన్ మార్కెట్‌ప్లేస్‌లు", externalEyebrow: "వ్యవసాయ మార్కెట్‌ప్లేస్‌లు", externalTitle: "వ్యాపారం కోసం మరిన్ని వేదికలను చూడండి.", externalText: "రైతు మార్కెట్‌లను తెలుసుకోవడానికి, వ్యవసాయ సరఫరాదారులు మరియు కొనుగోలుదారులతో కలవడానికి ఈ బాహ్య వేదికలను సందర్శించండి.", farmizenCategory: "సేంద్రీయ రైతు మార్కెట్లు", farmizenDescription: "స్థానిక, సేంద్రీయ ఉత్పత్తుల కోసం Farmizen రైతు మార్కెట్‌లను చూడండి.", commodityCategory: "వ్యవసాయ సరఫరాదారులు, కొనుగోలుదారుల B2B వేదిక", commodityDescription: "CommodityOnline ద్వారా వ్యవసాయ సరఫరాదారులు, కొనుగోలుదారులతో కలవండి.", visitFarmizen: "Farmizen సందర్శించండి", visitCommodity: "CommodityOnline సందర్శించండి", externalDisclaimer: "బాహ్య వెబ్‌సైట్ తెరవబడుతుంది. అక్కడి జాబితాలు లేదా లావాదేవీలను FarmWise నిర్వహించదు." },
   ta: { onlineMarketplaces: "ஆன்லைன் சந்தைகள்", externalEyebrow: "வேளாண் சந்தைகள்", externalTitle: "வணிகம் செய்ய மேலும் சந்தைகளைக் கண்டறியுங்கள்.", externalText: "விவசாயிகள் சந்தைகளைக் கண்டறியவும், வேளாண் விநியோகஸ்தர்கள் மற்றும் வாங்குபவர்களுடன் இணையவும் இந்த வெளிப்புற தளங்களைப் பாருங்கள்.", farmizenCategory: "இயற்கை விவசாயிகள் சந்தைகள்", farmizenDescription: "உள்ளூர் மற்றும் இயற்கை விளைபொருட்களுக்கான Farmizen விவசாயிகள் சந்தைகளைக் கண்டறியுங்கள்.", commodityCategory: "வேளாண் விநியோகஸ்தர்கள் மற்றும் வாங்குபவர்களுக்கான B2B", commodityDescription: "CommodityOnline மூலம் வேளாண் விநியோகஸ்தர்கள் மற்றும் வாங்குபவர்களுடன் இணையுங்கள்.", visitFarmizen: "Farmizen தளத்தைப் பாருங்கள்", visitCommodity: "CommodityOnline தளத்தைப் பாருங்கள்", externalDisclaimer: "வெளிப்புற இணையதளம் திறக்கும். அங்குள்ள பட்டியல்கள் அல்லது பரிவர்த்தனைகளை FarmWise நிர்வகிக்காது." },
 };
+const directoryTranslations: Partial<Record<Language, Record<string, string>>> = {
+  en: { communityEyebrow: "COMMUNITY DIRECTORY", communityDirectory: "Farmers, buyers & brokers", directoryIntro: "Find people by role. Create an account and complete your profile to join the FarmWise community.", createProfile: "Create your profile", directoryEveryone: "Everyone", directoryFarmers: "Farmers", directoryBuyers: "Buyers & brokers", directoryGrowing: "Growing", farmerProfilesEmpty: "Farmer profiles will appear here when they create an account.", buyerProfilesEmpty: "Buyer and broker profiles will appear here after they create an account." },
+  hi: { communityEyebrow: "किसान समुदाय", communityDirectory: "किसान, खरीदार और दलाल", directoryIntro: "भूमिका के अनुसार लोगों को खोजें। फार्मवाइज़ समुदाय से जुड़ने के लिए खाता बनाएँ और अपनी प्रोफ़ाइल पूरी करें।", createProfile: "अपनी प्रोफ़ाइल बनाएँ", directoryEveryone: "सभी", directoryFarmers: "किसान", directoryBuyers: "खरीदार और दलाल", directoryGrowing: "उगा रहे हैं", farmerProfilesEmpty: "खाता बनाने पर किसानों की प्रोफ़ाइल यहाँ दिखाई देगी।", buyerProfilesEmpty: "खाता बनाने पर खरीदारों और दलालों की प्रोफ़ाइल यहाँ दिखाई देगी।" },
+  kn: { communityEyebrow: "ರೈತರ ಸಮುದಾಯ", communityDirectory: "ರೈತರು, ಖರೀದಿದಾರರು ಮತ್ತು ದಲ್ಲಾಳಿಗಳು", directoryIntro: "ಪಾತ್ರದ ಆಧಾರದ ಮೇಲೆ ಜನರನ್ನು ಹುಡುಕಿ. ಫಾರ್ಮ್‌ವೈಸ್ ಸಮುದಾಯಕ್ಕೆ ಸೇರಲು ಖಾತೆ ರಚಿಸಿ ಮತ್ತು ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಪೂರ್ಣಗೊಳಿಸಿ.", createProfile: "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ರಚಿಸಿ", directoryEveryone: "ಎಲ್ಲರೂ", directoryFarmers: "ರೈತರು", directoryBuyers: "ಖರೀದಿದಾರರು ಮತ್ತು ದಲ್ಲಾಳಿಗಳು", directoryGrowing: "ಬೆಳೆಯುತ್ತಿರುವುದು", farmerProfilesEmpty: "ಖಾತೆ ರಚಿಸಿದಾಗ ರೈತರ ಪ್ರೊಫೈಲ್‌ಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.", buyerProfilesEmpty: "ಖಾತೆ ರಚಿಸಿದಾಗ ಖರೀದಿದಾರರು ಮತ್ತು ದಲ್ಲಾಳಿಗಳ ಪ್ರೊಫೈಲ್‌ಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ." },
+  te: { communityEyebrow: "రైతుల సంఘం", communityDirectory: "రైతులు, కొనుగోలుదారులు మరియు బ్రోకర్లు", directoryIntro: "పాత్ర ఆధారంగా వ్యక్తులను కనుగొనండి. ఫార్మ్‌వైస్ సంఘంలో చేరడానికి ఖాతా సృష్టించి, మీ ప్రొఫైల్‌ను పూర్తి చేయండి.", createProfile: "మీ ప్రొఫైల్ సృష్టించండి", directoryEveryone: "అందరూ", directoryFarmers: "రైతులు", directoryBuyers: "కొనుగోలుదారులు మరియు బ్రోకర్లు", directoryGrowing: "పండిస్తున్నవి", farmerProfilesEmpty: "ఖాతా సృష్టించినప్పుడు రైతుల ప్రొఫైల్‌లు ఇక్కడ కనిపిస్తాయి.", buyerProfilesEmpty: "ఖాతా సృష్టించినప్పుడు కొనుగోలుదారులు, బ్రోకర్ల ప్రొఫైల్‌లు ఇక్కడ కనిపిస్తాయి." },
+  ta: { communityEyebrow: "விவசாயிகள் சமூகம்", communityDirectory: "விவசாயிகள், வாங்குபவர்கள் மற்றும் தரகர்கள்", directoryIntro: "பங்கு அடிப்படையில் நபர்களைக் கண்டறியுங்கள். FarmWise சமூகத்தில் சேர கணக்கை உருவாக்கி உங்கள் சுயவிவரத்தை நிறைவு செய்யுங்கள்.", createProfile: "உங்கள் சுயவிவரத்தை உருவாக்குங்கள்", directoryEveryone: "அனைவரும்", directoryFarmers: "விவசாயிகள்", directoryBuyers: "வாங்குபவர்கள் மற்றும் தரகர்கள்", directoryGrowing: "பயிரிடுவது", farmerProfilesEmpty: "கணக்கு உருவாக்கிய விவசாயிகளின் சுயவிவரங்கள் இங்கே தோன்றும்.", buyerProfilesEmpty: "கணக்கு உருவாக்கிய வாங்குபவர்கள் மற்றும் தரகர்களின் சுயவிவரங்கள் இங்கே தோன்றும்." },
+};
 function useLanguage() {
   const context = useContext(LanguageContext);
   return {
     ...context,
     t: (key: string) =>
+      directoryTranslations[context.language]?.[key] ??
+      context.dynamicTranslations[context.language]?.[key] ??
       marketplacePageTranslations[context.language]?.[key] ??
       translations[context.language]?.[key] ??
-      context.dynamicTranslations[context.language]?.[key] ??
       translations.en?.[key] ??
       key,
   };
@@ -246,8 +254,8 @@ const navItems: { label: Module; icon: string }[] = [
 ];
 const navTranslationKeys: Record<string, string> = { Dashboard: "dashboard", "My Farm": "farm", "Crop Planner": "planner", "Market Intelligence": "markets", "Online Marketplaces": "onlineMarketplaces", "Buyers & Brokers": "buyers", "Crop Marketplace": "marketplace", Messages: "messages", "My Harvest": "harvest", "Crop Guide": "guide", "Farm Budget & Profit": "forecast", Analytics: "analytics", Profile: "profile" };
 
-// Pre-translated languages that don't need backend translation.
-const PRE_TRANSLATED_LANGUAGES: Set<Language> = new Set(["en", "hi", "kn", "te", "ta"]);
+// English ships locally; other selected languages fetch the fixed interface dictionary.
+const PRE_TRANSLATED_LANGUAGES: Set<Language> = new Set(["en"]);
 
 function App() {
   const [authenticated, setAuthenticated] = useState(false),
@@ -279,17 +287,13 @@ function App() {
   const changeLanguage = (nextLanguage: Language) => {
     setLanguage(nextLanguage);
     localStorage.setItem("farmwise_language", nextLanguage);
-    // Fetch translations from backend if language is not pre-translated
-    if (!PRE_TRANSLATED_LANGUAGES.has(nextLanguage) && !dynamicTranslations[nextLanguage]) {
-      void api.getInterfaceTranslations(nextLanguage)
-        .then((translated) => {
-          setDynamicTranslations((current) => ({ ...current, [nextLanguage]: translated }));
-        })
-        .catch((error) => {
-          console.error(`Failed to load translations for ${nextLanguage}:`, error);
-        });
-    }
   };
+  useEffect(() => {
+    if (PRE_TRANSLATED_LANGUAGES.has(language) || dynamicTranslations[language]) return;
+    void api.getInterfaceTranslations(language)
+      .then((translated) => setDynamicTranslations((current) => ({ ...current, [language]: translated })))
+      .catch((error) => console.error(`Failed to load translations for ${language}:`, error));
+  }, [language, dynamicTranslations]);
   useEffect(() => {
     let cancelled = false;
     const checkBackend = () => {
@@ -1820,6 +1824,7 @@ function BuyerView({
   onCreateProfile: () => void;
   onContact: (intent: { listingId?: number; buyerUserId?: number }) => void;
 }) {
+  const { t } = useLanguage();
   const [directory, setDirectory] = useState<BuyerProfile[]>([]);
   const [people, setPeople] = useState<DirectoryProfile[]>([]);
   const [listings, setListings] = useState<CropListing[]>([]);
@@ -1885,18 +1890,18 @@ function BuyerView({
       />
       {role === "farmer" && <section className="people-directory panel">
         <div className="marketplace-section-heading">
-          <div><span className="eyebrow green">COMMUNITY DIRECTORY</span><h2>Farmers, buyers & brokers</h2></div>
-          <button className="primary-button" onClick={onCreateProfile}>Create your profile</button>
+          <div><span className="eyebrow green">{t("communityEyebrow")}</span><h2>{t("communityDirectory")}</h2></div>
+          <button className="primary-button" onClick={onCreateProfile}>{t("createProfile")}</button>
         </div>
-        <p className="directory-intro">Find people by role. Create an account and complete your profile to join the FarmWise community.</p>
+        <p className="directory-intro">{t("directoryIntro")}</p>
         <div className="directory-filters" role="group" aria-label="Filter people by type">
-          {(["all", "farmer", "buyer"] as const).map((type) => <button key={type} className={directoryType === type ? "active" : ""} onClick={() => setDirectoryType(type)}>{type === "all" ? "Everyone" : type === "farmer" ? "Farmers" : "Buyers & brokers"}</button>)}
+          {(["all", "farmer", "buyer"] as const).map((type) => <button key={type} className={directoryType === type ? "active" : ""} onClick={() => setDirectoryType(type)}>{type === "all" ? t("directoryEveryone") : type === "farmer" ? t("directoryFarmers") : t("directoryBuyers")}</button>)}
         </div>
         <div className="people-directory-grid">
-          {(directoryType !== "buyer" ? farmerDirectory.map((farmer) => ({ id: `farmer-${farmer.id}`, name: farmer.name, type: "Farmer", location: farmer.location, detail: farmer.crops })) : []).map((person) => <article className="person-card" key={person.id}><span className="person-avatar">{person.name.slice(0, 2).toUpperCase()}</span><div><span className="person-role">{person.type}</span><h3>{person.name}</h3><p>{person.location}</p><small>{person.detail ? `Growing: ${person.detail}` : "FarmWise farmer"}</small></div></article>)}
+          {(directoryType !== "buyer" ? farmerDirectory.map((farmer) => ({ id: `farmer-${farmer.id}`, name: farmer.name, type: t("directoryFarmers"), location: farmer.location, detail: farmer.crops })) : []).map((person) => <article className="person-card" key={person.id}><span className="person-avatar">{person.name.slice(0, 2).toUpperCase()}</span><div><span className="person-role">{person.type}</span><h3>{person.name}</h3><p>{person.location}</p><small>{person.detail ? `${t("directoryGrowing")}: ${person.detail}` : "FarmWise"}</small></div></article>)}
           {(directoryType !== "farmer" ? visibleBuyers.map((buyer) => ({ id: `buyer-${buyer.id}`, name: buyer.name, type: buyer.business_type, location: buyer.location_name, detail: buyer.verification_status === "verified" ? "Verified business" : "Buyer / broker account" })) : []).map((person) => <article className="person-card" key={person.id}><span className="person-avatar buyer">{person.name.slice(0, 2).toUpperCase()}</span><div><span className="person-role">{person.type}</span><h3>{person.name}</h3><p>{person.location}</p><small>{person.detail}</small></div></article>)}
-          {!loading && !farmerDirectory.length && directoryType !== "buyer" && <p className="empty-state">Farmer profiles will appear here when they share a crop listing.</p>}
-          {!loading && !visibleBuyers.length && directoryType !== "farmer" && <p className="empty-state">Buyer and broker profiles will appear here after they create an account.</p>}
+          {!loading && !farmerDirectory.length && directoryType !== "buyer" && <p className="empty-state">{t("farmerProfilesEmpty")}</p>}
+          {!loading && !visibleBuyers.length && directoryType !== "farmer" && <p className="empty-state">{t("buyerProfilesEmpty")}</p>}
         </div>
       </section>}
       {error && <div className="marketplace-error">{error}</div>}

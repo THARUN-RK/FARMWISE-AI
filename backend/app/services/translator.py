@@ -49,28 +49,41 @@ INTERFACE_STRINGS = {
     "visitFarmizen": "Visit Farmizen",
     "visitCommodity": "Visit CommodityOnline",
     "externalDisclaimer": "Opens an external website. FarmWise does not manage its listings or transactions.",
+    "communityEyebrow": "COMMUNITY DIRECTORY",
+    "communityDirectory": "Farmers, buyers & brokers",
+    "directoryIntro": "Find people by role. Create an account and complete your profile to join the FarmWise community.",
+    "createProfile": "Create your profile",
+    "directoryEveryone": "Everyone",
+    "directoryFarmers": "Farmers",
+    "directoryBuyers": "Buyers & brokers",
+    "directoryGrowing": "Growing",
+    "directoryFilterLabel": "Filter people by type",
+    "directoryVerified": "Verified business",
+    "directoryBuyerAccount": "Buyer / broker account",
+    "farmerProfilesEmpty": "Farmer profiles will appear here when they create an account.",
+    "buyerProfilesEmpty": "Buyer and broker profiles will appear here after they create an account.",
 }
 
 LANGUAGE_CODES = {
     "as": "as",
     "bn": "bn",
-    "brx": "xx",  # Bodo not directly supported; fallback to placeholder
-    "doi": "hi",  # Dogri not directly supported; use Hindi
+    "brx": "as",  # Bodo is unavailable; use the closest supported regional language
+    "doi": "doi",
     "gu": "gu",
     "hi": "hi",
     "kn": "kn",
     "ks": "ur",  # Kashmiri not directly supported; use Urdu
-    "kok": "xx",  # Konkani not directly supported
-    "mai": "hi",  # Maithili not directly supported; use Hindi
+    "kok": "gom",
+    "mai": "mai",
     "ml": "ml",
-    "mni": "xx",  # Manipuri not directly supported
+    "mni": "mni-Mtei",
     "mr": "mr",
     "ne": "ne",
     "or": "or",
     "pa": "pa",
-    "sa": "hi",  # Sanskrit not directly supported; use Hindi
-    "sat": "xx",  # Santali not directly supported
-    "sd": "ur",  # Sindhi: use Urdu
+    "sa": "sa",
+    "sat": "bn",  # Santali is unavailable; use a nearby supported regional language
+    "sd": "sd",
     "ta": "ta",
     "te": "te",
     "ur": "ur",

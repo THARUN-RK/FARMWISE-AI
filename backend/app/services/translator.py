@@ -122,10 +122,10 @@ class TranslatorService:
         if google_lang == "en":
             return strings
 
-        if not HAS_GOOGLE_TRANSLATE:
-            raise RuntimeError("Google Cloud Translation dependency is not installed.")
         if not settings.google_translate_api_key:
             raise RuntimeError("Google Cloud Translation API key is not configured.")
+        if not HAS_GOOGLE_TRANSLATE:
+            raise RuntimeError("Google Cloud Translation dependency is not installed.")
 
         client = TranslatorService._get_client()
         if client is None:

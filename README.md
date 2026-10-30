@@ -61,10 +61,10 @@ Password: DemoPass123!
 
 The frontend Demo Mode works without the backend. Real login, personalized farm data, and recommendations require the FastAPI backend to be running or deployed and configured through `VITE_API_URL`.
 
-For the Docker backend, create `backend/.env` from `backend/.env.example` and
-set `GOOGLE_CLIENT_ID` to the same client ID as `VITE_GOOGLE_CLIENT_ID`.
-Docker Compose now forwards that setting into the API container. A missing value
-causes Google sign-in to return a configuration error by design.
+The supplied Google OAuth Web client ID is configured as the frontend and
+backend default. You can override it with `VITE_GOOGLE_CLIENT_ID` for the
+frontend build and `GOOGLE_CLIENT_ID` on the backend; both values must match.
+Docker Compose forwards the backend setting into the API container.
 
 To enable Google sign-in, create a Google OAuth **Web application** client and
 add these exact origins as authorized JavaScript origins (origins have no path):

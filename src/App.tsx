@@ -26,6 +26,7 @@ type GoogleIdentityClient = {
 
 let initializedGoogleClientId: string | null = null;
 let activeGoogleCredentialHandler: GoogleCredentialHandler | null = null;
+const DEFAULT_GOOGLE_CLIENT_ID = "263684588844-r1cllo3a62gfisbstsqevnmgnvu1j3pd.apps.googleusercontent.com";
 
 declare global {
   interface Window {
@@ -304,16 +305,19 @@ function App() {
   }, []);
   const loadAccount = async (token: string) => {
     const currentUser = await api.me(token);
-    const farms = await api.farms(token);
     setUser(currentUser);
+    const accountLanguage = supportedLanguages.find((option) => option.code === currentUser.language)?.code ?? "en";
+    setLanguage(accountLanguage);
+    localStorage.setItem("farmwise_language", accountLanguage);
+    const farms = await api.farms(token).catch(() => []);
     setFarm(farms[0] ?? null);
     setActive(currentUser.role === "buyer" ? "Crop Marketplace" : "Dashboard");
     setAuthenticated(true);
     if (farms[0]) {
       setSoil(farms[0].soil_type);
       setWater(farms[0].water_availability);
-      const result = await api.recommendations(farms[0].id, token);
-      setApiRecommendations(result.recommendations);
+      const result = await api.recommendations(farms[0].id, token).catch(() => null);
+      setApiRecommendations(result?.recommendations ?? []);
     }
   };
   const saveFarm = async (payload: Omit<Farm, "id">) => {
@@ -821,7 +825,7 @@ function Landing({
   authMode: "login" | "signup" | null;
   setAuthMode: (mode: "login" | "signup" | null) => void;
   onLogin: (identifier: string, password: string) => Promise<void>;
-  onSignup: (payload: { name: string; phone: string; email: string; password: string; confirm_password: string; role: string; state: string; district: string }) => Promise<void>;
+  onSignup: (payload: { name: string; phone: string; email: string; password: string; confirm_password: string; role: string; state: string; district: string; language: Language }) => Promise<void>;
   onGoogle: (credential: string, phone?: string) => Promise<Awaited<ReturnType<typeof api.googleLogin>>>;
   onDemo: () => void;
 }) {
@@ -966,10 +970,10 @@ function AuthModal({
   setMode: (mode: "login" | "signup" | null) => void;
   onClose: () => void;
   onLogin: (identifier: string, password: string) => Promise<void>;
-  onSignup: (payload: { name: string; phone: string; email: string; password: string; confirm_password: string; role: string; state: string; district: string }) => Promise<void>;
+  onSignup: (payload: { name: string; phone: string; email: string; password: string; confirm_password: string; role: string; state: string; district: string; language: Language }) => Promise<void>;
   onGoogle: (credential: string, phone?: string) => Promise<Awaited<ReturnType<typeof api.googleLogin>>>;
 }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [name, setName] = useState("");
   const [identifier, setIdentifier] = useState("");
   const [phone, setPhone] = useState("");
@@ -985,7 +989,7 @@ function AuthModal({
   const [googlePhoneRequired, setGooglePhoneRequired] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
   const googleButtonRef = useRef<HTMLDivElement>(null);
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() || DEFAULT_GOOGLE_CLIENT_ID;
   const onGoogleRef = useRef(onGoogle);
   onGoogleRef.current = onGoogle;
 
@@ -1063,7 +1067,7 @@ function AuthModal({
     try {
       setError("");
       if (mode === "login") await onLogin(identifier, password);
-      else await onSignup({ name, phone, email, password, confirm_password: confirmation, role, state, district });
+      else await onSignup({ name, phone, email, password, confirm_password: confirmation, role, state, district, language });
     } catch (submitError) { setError(submitError instanceof Error ? submitError.message : "Unable to continue"); }
   };
   return (

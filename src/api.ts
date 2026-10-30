@@ -222,6 +222,7 @@ export const api = {
     role: string;
     state: string;
     district: string;
+    language: string;
   }) =>
     request<{ access_token: string; user: User }>("/auth/register", {
       method: "POST",

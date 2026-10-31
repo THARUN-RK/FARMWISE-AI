@@ -95,8 +95,8 @@ If the Pages settings are using branch deployment instead of Actions, set **Sett
 1. Create a new Render Blueprint from this repository.
 2. Select `backend/render.yaml`.
 3. Wait for the web service and PostgreSQL database to become healthy.
-4. Copy the API URL, for example `https://farmwise-ai-api.onrender.com`.
-5. Set the GitHub repository variable `VITE_API_URL` to `https://farmwise-ai-api.onrender.com/api/v1`.
+4. Copy the API URL shown on your Render service. The currently deployed API is `https://farmwise-ai-1-8hi6.onrender.com` (the retired `farmwise-ai-api.onrender.com` address returns 404).
+5. Set the GitHub repository variable `VITE_API_URL` to `<your-render-api-url>/api/v1`, for example `https://farmwise-ai-1-8hi6.onrender.com/api/v1`.
 6. Set the GitHub repository variable `VITE_GOOGLE_CLIENT_ID` to your Google OAuth Web client ID, and set the same ID as `GOOGLE_CLIENT_ID` on Render.
 7. Add `https://tharun-rk.github.io` to the OAuth client's authorized JavaScript origins, then run the Pages workflow again.
 

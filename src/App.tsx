@@ -1078,6 +1078,7 @@ function Dashboard({
   farm,
   go,
   rankedCrops,
+  rankedMarkets,
 }: {
   user: User | null;
   farm: Farm | null;

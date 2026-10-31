@@ -98,7 +98,8 @@ If the Pages settings are using branch deployment instead of Actions, set **Sett
 4. Copy the API URL shown on your Render service. The currently deployed API is `https://farmwise-ai-1-8hi6.onrender.com` (the retired `farmwise-ai-api.onrender.com` address returns 404).
 5. Set the GitHub repository variable `VITE_API_URL` to `<your-render-api-url>/api/v1`, for example `https://farmwise-ai-1-8hi6.onrender.com/api/v1`.
 6. Set the GitHub repository variable `VITE_GOOGLE_CLIENT_ID` to your Google OAuth Web client ID, and set the same ID as `GOOGLE_CLIENT_ID` on Render.
-7. Add `https://tharun-rk.github.io` to the OAuth client's authorized JavaScript origins, then run the Pages workflow again.
+7. To translate the interface, enable the Google Cloud Translation API (v2) with billing and add its API key as the Render secret `GOOGLE_TRANSLATE_API_KEY`. The key must be kept on the backend; do not add it to GitHub Pages or commit it.
+8. Add `https://tharun-rk.github.io` to the OAuth client's authorized JavaScript origins, then run the Pages workflow again.
 
 Until this is configured, signup and login work only when the local FastAPI server is running. Demo Mode does not need the backend.
 

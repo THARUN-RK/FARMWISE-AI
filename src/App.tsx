@@ -202,6 +202,7 @@ function App() {
     return supportedLanguages.find((option) => option.code === savedLanguage)?.code ?? "en";
   });
   const [dynamicTranslations, setDynamicTranslations] = useState<Partial<Record<Language, Record<string, string>>>>({});
+  const [translationUnavailable, setTranslationUnavailable] = useState(false);
   const [user, setUser] = useState<User | null>(null),
     [farm, setFarm] = useState<Farm | null>(null),
     [apiRecommendations, setApiRecommendations] = useState<ApiCrop[]>([]);
@@ -218,13 +219,24 @@ function App() {
     [soil, setSoil] = useState("Loamy");
   const changeLanguage = (nextLanguage: Language) => {
     setLanguage(nextLanguage);
+    setTranslationUnavailable(false);
     localStorage.setItem("farmwise_language", nextLanguage);
   };
   useEffect(() => {
-    if (PRE_TRANSLATED_LANGUAGES.has(language) || dynamicTranslations[language]) return;
+    if (PRE_TRANSLATED_LANGUAGES.has(language)) {
+      setTranslationUnavailable(false);
+      return;
+    }
+    if (dynamicTranslations[language]) return;
     void api.getInterfaceTranslations(language)
-      .then((translated) => setDynamicTranslations((current) => ({ ...current, [language]: translated })))
-      .catch((error) => console.error(`Failed to load translations for ${language}:`, error));
+      .then((translated) => {
+        setDynamicTranslations((current) => ({ ...current, [language]: translated }));
+        setTranslationUnavailable(false);
+      })
+      .catch((error) => {
+        setTranslationUnavailable(true);
+        console.error(`Failed to load translations for ${language}:`, error);
+      });
   }, [language, dynamicTranslations]);
   useEffect(() => {
     let cancelled = false;
@@ -497,6 +509,11 @@ function App() {
           </div>
         </header>
         <div className="page-body">
+          {translationUnavailable && (
+            <div className="alert-note" role="status">
+              Translation service is unavailable. Some interface text may remain in English.
+            </div>
+          )}
           {active === "Dashboard" && (
             <Dashboard
               user={user}
@@ -1091,34 +1108,33 @@ function Dashboard({
     <>
       <div className="page-intro">
         <div>
-          <p className="eyebrow green">YOUR FARMWISE WORKSPACE</p>
+          <p className="eyebrow green">{t("workspaceTitle")}</p>
           <h1>
             {t("greeting")}, {user?.name ?? "there"} <span>✦</span>
           </h1>
           <p>
-            {farm ? `${farm.land_size_acres} acres · ${farm.soil_type} soil · ${farm.water_availability} water` : "Complete your farm profile to unlock personal recommendations."}
+            {farm ? `${farm.land_size_acres} ${t("acres")} · ${farm.soil_type} ${t("soil")} · ${farm.water_availability} ${t("water")}` : t("completeFarmProfile")}
           </p>
         </div>
         <div className="intro-actions">
           <button className="primary-button" onClick={() => go("My Farm")}>
-            + Update farm inputs
+            + {t("updateFarmInputs")}
           </button>
         </div>
       </div>
       <section className="dashboard-hero">
         <div>
-          <span className="hero-label">YOUR NEXT BEST DECISION</span>
+          <span className="hero-label">{t("nextBestDecision")}</span>
           <h2>
-            Net profit before
+            {t("netProfitBefore")}
             <br />
-            <em>you plant.</em>
+            <em>{t("youPlant")}</em>
           </h2>
           <p>
-            FarmWise connects your farm profile, timing, markets and buyers into
-            one clear plan.
+            {t("dashboardPromise")}
           </p>
           <button className="cream-button" onClick={() => go("Crop Planner")}>
-            Open crop planner <span>→</span>
+            {t("openCropPlanner")} <span>→</span>
           </button>
         </div>
         <div className="dashboard-hero-art">
@@ -1128,78 +1144,78 @@ function Dashboard({
           <div className="hero-seal">
             <strong>₹</strong>
             <span>
-              Make every
+              {t("makeEvery")}
               <br />
-              acre count
+              {t("acreCount")}
             </span>
           </div>
         </div>
       </section>
       <div className="stat-row">
         <Stat
-          label="Expected net realization"
+          label={t("expectedNetRealization")}
           value={farm ? `INR ${Math.round((farm.budget || 0) * 1.08).toLocaleString("en-IN")}` : "—"}
-          note="profile estimate"
-          change={farm ? "Estimated" : "Add farm"}
+          note={t("profileEstimate")}
+          change={farm ? t("estimated") : t("addFarm")}
         />
         <Stat
-          label="Top crop fit"
+          label={t("topCropFit")}
           value={rankedCrops[0]?.name ?? "—"}
-          note={rankedCrops[0] ? `${rankedCrops[0].score}% suitability` : "No recommendation yet"}
-          change={rankedCrops[0] ? "Top pick" : "Add farm"}
+          note={rankedCrops[0] ? `${rankedCrops[0].score}% ${t("suitability")}` : t("noRecommendationYet")}
+          change={rankedCrops[0] ? t("topPick") : t("addFarm")}
         />
         <Stat
-          label="Best market"
+          label={t("bestMarket")}
           value={rankedMarkets[0]?.name ?? "—"}
-          note={rankedMarkets[0] ? `INR ${rankedMarkets[0].net.toFixed(2)} / kg net` : "No market data"}
-          change={rankedMarkets[0] ? "Recommended" : "Unavailable"}
+          note={rankedMarkets[0] ? `INR ${rankedMarkets[0].net.toFixed(2)} / kg net` : t("noMarketData")}
+          change={rankedMarkets[0] ? t("recommended") : t("unavailable")}
         />
         <Stat
-          label="Water efficiency"
+          label={t("waterEfficiency")}
           value={farm ? "Profile-based" : "—"}
-          note="resource estimate"
-          change={farm ? "On track" : "Add farm"}
+          note={t("resourceEstimate")}
+          change={farm ? t("onTrack") : t("addFarm")}
         />
       </div>
       <div className="section-title">
         <div>
           <span className="section-index">01</span>
           <div>
-            <p className="eyebrow">THE FARM-TO-MARKET PLAN</p>
-            <h2>Your decision path</h2>
+            <p className="eyebrow">{t("farmToMarketPlan")}</p>
+            <h2>{t("decisionPath")}</h2>
           </div>
         </div>
       </div>
       <div className="journey-card">
         <Journey
-          label="Grow"
-          value={rankedCrops[0]?.name ?? "No crop yet"}
-          status="Recommended"
+          label={t("grow")}
+          value={rankedCrops[0]?.name ?? t("noCropYet")}
+          status={t("recommended")}
           icon="✦"
           active
         />
         <Journey
-          label="Sow"
-          value={farm ? "Open crop planner" : "Add farm first"}
-          status={farm ? "Build a crop plan" : "Complete farm profile"}
+          label={t("sow")}
+          value={farm ? t("openCropPlanner") : t("addFarmFirst")}
+          status={farm ? t("buildCropPlan") : t("completeFarmProfileShort")}
           icon="◷"
         />
         <Journey
-          label="Harvest"
-          value="No harvest yet"
-          status="Add harvest"
+          label={t("harvest")}
+          value={t("noHarvestYet")}
+          status={t("addHarvest")}
           icon="◒"
         />
         <Journey
-          label="Sell"
-          value={rankedMarkets[0]?.name ?? "No market yet"}
-          status={rankedMarkets[0] ? `INR ${rankedMarkets[0].net.toFixed(2)} / kg` : "Add harvest"}
+          label={t("sell")}
+          value={rankedMarkets[0]?.name ?? t("noMarketYet")}
+          status={rankedMarkets[0] ? `INR ${rankedMarkets[0].net.toFixed(2)} / kg` : t("addHarvest")}
           icon="↗"
         />
         <Journey
-          label="Connect"
-          value="No matches yet"
-          status="Add harvest"
+          label={t("connect")}
+          value={t("noMatchesYet")}
+          status={t("addHarvest")}
           icon="♧"
         />
       </div>

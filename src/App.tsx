@@ -97,12 +97,20 @@ const directoryTranslations: Partial<Record<Language, Record<string, string>>> =
   te: { communityEyebrow: "రైతుల సంఘం", communityDirectory: "రైతులు, కొనుగోలుదారులు మరియు బ్రోకర్లు", directoryIntro: "పాత్ర ఆధారంగా వ్యక్తులను కనుగొనండి. ఫార్మ్‌వైస్ సంఘంలో చేరడానికి ఖాతా సృష్టించి, మీ ప్రొఫైల్‌ను పూర్తి చేయండి.", createProfile: "మీ ప్రొఫైల్ సృష్టించండి", directoryEveryone: "అందరూ", directoryFarmers: "రైతులు", directoryBuyers: "కొనుగోలుదారులు మరియు బ్రోకర్లు", directoryGrowing: "పండిస్తున్నవి", farmerProfilesEmpty: "ఖాతా సృష్టించినప్పుడు రైతుల ప్రొఫైల్‌లు ఇక్కడ కనిపిస్తాయి.", buyerProfilesEmpty: "ఖాతా సృష్టించినప్పుడు కొనుగోలుదారులు, బ్రోకర్ల ప్రొఫైల్‌లు ఇక్కడ కనిపిస్తాయి." },
   ta: { communityEyebrow: "விவசாயிகள் சமூகம்", communityDirectory: "விவசாயிகள், வாங்குபவர்கள் மற்றும் தரகர்கள்", directoryIntro: "பங்கு அடிப்படையில் நபர்களைக் கண்டறியுங்கள். FarmWise சமூகத்தில் சேர கணக்கை உருவாக்கி உங்கள் சுயவிவரத்தை நிறைவு செய்யுங்கள்.", createProfile: "உங்கள் சுயவிவரத்தை உருவாக்குங்கள்", directoryEveryone: "அனைவரும்", directoryFarmers: "விவசாயிகள்", directoryBuyers: "வாங்குபவர்கள் மற்றும் தரகர்கள்", directoryGrowing: "பயிரிடுவது", farmerProfilesEmpty: "கணக்கு உருவாக்கிய விவசாயிகளின் சுயவிவரங்கள் இங்கே தோன்றும்.", buyerProfilesEmpty: "கணக்கு உருவாக்கிய வாங்குபவர்கள் மற்றும் தரகர்களின் சுயவிவரங்கள் இங்கே தோன்றும்." },
 };
+const directoryDemoTranslations: Partial<Record<Language, Record<string, string>>> = {
+  en: { createRealAccount: "Create a real account", directoryDemoNotice: "Demo Mode uses sample profiles. They are not saved to the shared directory. Create a real account to appear in the list." },
+  hi: { createRealAccount: "वास्तविक खाता बनाएँ", directoryDemoNotice: "डेमो मोड में नमूना प्रोफ़ाइलें दिखाई जाती हैं। वे साझा सूची में सेव नहीं होतीं। सूची में दिखने के लिए वास्तविक खाता बनाएँ।" },
+  kn: { createRealAccount: "ನಿಜವಾದ ಖಾತೆ ರಚಿಸಿ", directoryDemoNotice: "ಡೆಮೋ ಮೋಡ್ ಮಾದರಿ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ತೋರಿಸುತ್ತದೆ. ಅವು ಹಂಚಿದ ಪಟ್ಟಿಯಲ್ಲಿ ಉಳಿಯುವುದಿಲ್ಲ. ಪಟ್ಟಿಯಲ್ಲಿ ಕಾಣಲು ನಿಜವಾದ ಖಾತೆ ರಚಿಸಿ." },
+  te: { createRealAccount: "నిజమైన ఖాతా సృష్టించండి", directoryDemoNotice: "డెమో మోడ్ నమూనా ప్రొఫైల్‌లను చూపుతుంది. అవి అందరికీ కనిపించే జాబితాలో సేవ్ కావు. జాబితాలో కనిపించడానికి నిజమైన ఖాతా సృష్టించండి." },
+  ta: { createRealAccount: "உண்மையான கணக்கை உருவாக்குங்கள்", directoryDemoNotice: "டெமோ பயன்முறையில் மாதிரி சுயவிவரங்கள் காட்டப்படும். அவை பகிரப்பட்ட பட்டியலில் சேமிக்கப்படாது. பட்டியலில் தோன்ற உண்மையான கணக்கை உருவாக்குங்கள்." },
+};
 function useLanguage() {
   const context = useContext(LanguageContext);
   return {
     ...context,
     t: (key: string) =>
       directoryTranslations[context.language]?.[key] ??
+      directoryDemoTranslations[context.language]?.[key] ??
       context.dynamicTranslations[context.language]?.[key] ??
       marketplacePageTranslations[context.language]?.[key] ??
       translations[context.language]?.[key] ??
@@ -614,7 +622,13 @@ function App() {
               token={getToken()}
               demo={demo}
               role="farmer"
-              onCreateProfile={() => setActive("Profile")}
+              onCreateProfile={() => {
+                if (demo) {
+                  setDemo(false);
+                  setAuthenticated(false);
+                  setAuthMode("signup");
+                } else setActive("Profile");
+              }}
               onContact={startContact}
             />
           )}
@@ -1891,9 +1905,10 @@ function BuyerView({
       {role === "farmer" && <section className="people-directory panel">
         <div className="marketplace-section-heading">
           <div><span className="eyebrow green">{t("communityEyebrow")}</span><h2>{t("communityDirectory")}</h2></div>
-          <button className="primary-button" onClick={onCreateProfile}>{t("createProfile")}</button>
+          <button className="primary-button" onClick={onCreateProfile}>{demo ? t("createRealAccount") : t("createProfile")}</button>
         </div>
         <p className="directory-intro">{t("directoryIntro")}</p>
+        {demo && <p className="directory-demo-notice" role="note">{t("directoryDemoNotice")}</p>}
         <div className="directory-filters" role="group" aria-label="Filter people by type">
           {(["all", "farmer", "buyer"] as const).map((type) => <button key={type} className={directoryType === type ? "active" : ""} onClick={() => setDirectoryType(type)}>{type === "all" ? t("directoryEveryone") : type === "farmer" ? t("directoryFarmers") : t("directoryBuyers")}</button>)}
         </div>

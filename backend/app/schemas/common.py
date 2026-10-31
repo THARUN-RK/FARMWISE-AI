@@ -2,7 +2,7 @@ import re
 import base64
 import binascii
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -79,6 +79,7 @@ class TokenResponse(BaseModel):
 
 class ProfileUpdate(BaseModel):
     name: str = Field(min_length=2)
+    role: Literal["farmer", "buyer"] | None = None
     language: str = "en"
     location_name: str | None = None
     latitude: float | None = Field(default=None, ge=-90, le=90)

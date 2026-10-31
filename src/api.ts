@@ -231,7 +231,7 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   me: (token: string) => request<User>("/auth/me", {}, token),
-  updateProfile: (payload: { name: string; language: string; location_name?: string | null; state?: string | null; district?: string | null; latitude?: number | null; longitude?: number | null }, token: string) => request<User>("/farmers/profile", { method: "PUT", body: JSON.stringify(payload) }, token),
+  updateProfile: (payload: { name: string; role?: "farmer" | "buyer"; language: string; location_name?: string | null; state?: string | null; district?: string | null; latitude?: number | null; longitude?: number | null }, token: string) => request<User>("/farmers/profile", { method: "PUT", body: JSON.stringify(payload) }, token),
   farms: (token: string) => request<Farm[]>("/farms", {}, token),
   harvests: (token: string) => request<Array<{ id: number; crop_id: number; crop: string; quantity_tonnes: number; grade: string; harvest_date: string; notes?: string | null; is_listed: boolean }>>("/harvests", {}, token),
   alerts: (token: string) => request<AccountAlert[]>("/alerts", {}, token),

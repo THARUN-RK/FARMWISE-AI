@@ -168,6 +168,12 @@ def test_conversation_contact_and_location_require_each_party_consent():
         },
     )
     assert buyer_profile_update.status_code == 200
+    community_directory = client.get("/api/v1/directory").json()["data"]
+    buyer_community_entry = next(entry for entry in community_directory if entry["id"] == buyer["id"])
+    assert buyer_community_entry["type"] == "buyer"
+    assert buyer_community_entry["location"] == "Mysuru, Karnataka"
+    assert "phone" not in buyer_community_entry
+    assert "email" not in buyer_community_entry
     buyer_directory = client.get("/api/v1/buyers").json()["data"]
     buyer_profile = next(entry for entry in buyer_directory if entry["account_id"] == buyer["id"])
     assert "phone" not in buyer_profile
@@ -178,7 +184,6 @@ def test_conversation_contact_and_location_require_each_party_consent():
     assert listing["media_type"] == "video/mp4"
     assert "phone" not in listing["farmer"]
     assert "email" not in listing["farmer"]
-
     started = client.post(
         "/api/v1/conversations",
         headers=buyer_headers,
@@ -211,6 +216,45 @@ def test_conversation_contact_and_location_require_each_party_consent():
     assert buyer_view["other_party"]["email"] == farmer["email"]
     assert buyer_view["other_party"]["location_name"] == "Farm address"
     assert buyer_view["other_party"]["latitude"] == 12.2958
+
+
+def test_farmer_can_join_buyer_directory_by_changing_account_type():
+    suffix = uuid4().hex[:8]
+    registration = client.post(
+        "/api/v1/auth/register",
+        json={
+            "name": "Role Change User",
+            "phone": f"+9195{uuid4().int % 10**8:08d}",
+            "email": f"role-change-{suffix}@example.com",
+            "password": "StrongPass123",
+            "role": "farmer",
+            "state": "Karnataka",
+            "district": "Mysuru",
+        },
+    )
+    assert registration.status_code == 201
+    account = registration.json()["data"]["user"]
+    headers = {"Authorization": f"Bearer {registration.json()['data']['access_token']}"}
+
+    changed = client.put(
+        "/api/v1/farmers/profile",
+        headers=headers,
+        json={"name": account["name"], "role": "buyer", "language": "en"},
+    )
+    assert changed.status_code == 200
+    assert changed.json()["data"]["role"] == "buyer"
+
+    directory = client.get("/api/v1/directory").json()["data"]
+    assert any(entry["id"] == account["id"] and entry["type"] == "buyer" for entry in directory)
+    buyers = client.get("/api/v1/buyers").json()["data"]
+    assert any(entry["account_id"] == account["id"] for entry in buyers)
+
+    forbidden_role = client.put(
+        "/api/v1/farmers/profile",
+        headers=headers,
+        json={"name": account["name"], "role": "admin", "language": "en"},
+    )
+    assert forbidden_role.status_code == 422
 
 
 def test_crop_media_rejects_oversized_video():

@@ -44,6 +44,7 @@ reuse the example value or commit a real secret. Local development defaults to
 
 - `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `GET /api/v1/auth/me`
 - `POST|GET|PUT /api/v1/farmers/profile`
+- `PUT /api/v1/farmers/profile` can change an authenticated account between `farmer` and `buyer`; self-service changes cannot grant the `admin` role.
 - `POST /api/v1/farms`, `GET /api/v1/farms`, `PUT /api/v1/farms/{id}`
 - `POST /api/v1/recommendations/crops`
 - `GET /api/v1/recommendations/sowing-window/{crop_id}`

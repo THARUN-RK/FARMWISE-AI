@@ -62,6 +62,12 @@ INTERFACE_STRINGS = {
     "directoryBuyerAccount": "Buyer / broker account",
     "farmerProfilesEmpty": "Farmer profiles will appear here when they create an account.",
     "buyerProfilesEmpty": "Buyer and broker profiles will appear here after they create an account.",
+    "buyerDirectoryEmptyHelp": "Choose Buyer / broker as your account type in Profile to join this list.",
+    "chooseAccountType": "Choose account type",
+    "accountType": "Account type",
+    "farmerAccountType": "Farmer",
+    "buyerAccountType": "Buyer / broker",
+    "adminAccountType": "Administrator",
     "createRealAccount": "Create a real account",
     "directoryDemoNotice": "Demo Mode uses sample profiles. They are not saved to the shared directory. Create a real account to appear in the list.",
 }

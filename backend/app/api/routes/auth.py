@@ -166,7 +166,7 @@ def create_profile(
     db: Session = Depends(get_db),
 ):
     """Create or overwrite authenticated account profile fields."""
-    for key, value in body.model_dump().items():
+    for key, value in body.model_dump(exclude_none=True).items():
         setattr(user, key, value)
     db.commit()
     db.refresh(user)

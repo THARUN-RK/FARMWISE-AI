@@ -91,11 +91,11 @@ const marketplacePageTranslations: Partial<Record<Language, Record<string, strin
   ta: { onlineMarketplaces: "ஆன்லைன் சந்தைகள்", externalEyebrow: "வேளாண் சந்தைகள்", externalTitle: "வணிகம் செய்ய மேலும் சந்தைகளைக் கண்டறியுங்கள்.", externalText: "விவசாயிகள் சந்தைகளைக் கண்டறியவும், வேளாண் விநியோகஸ்தர்கள் மற்றும் வாங்குபவர்களுடன் இணையவும் இந்த வெளிப்புற தளங்களைப் பாருங்கள்.", farmizenCategory: "இயற்கை விவசாயிகள் சந்தைகள்", farmizenDescription: "உள்ளூர் மற்றும் இயற்கை விளைபொருட்களுக்கான Farmizen விவசாயிகள் சந்தைகளைக் கண்டறியுங்கள்.", commodityCategory: "வேளாண் விநியோகஸ்தர்கள் மற்றும் வாங்குபவர்களுக்கான B2B", commodityDescription: "CommodityOnline மூலம் வேளாண் விநியோகஸ்தர்கள் மற்றும் வாங்குபவர்களுடன் இணையுங்கள்.", visitFarmizen: "Farmizen தளத்தைப் பாருங்கள்", visitCommodity: "CommodityOnline தளத்தைப் பாருங்கள்", externalDisclaimer: "வெளிப்புற இணையதளம் திறக்கும். அங்குள்ள பட்டியல்கள் அல்லது பரிவர்த்தனைகளை FarmWise நிர்வகிக்காது." },
 };
 const directoryTranslations: Partial<Record<Language, Record<string, string>>> = {
-  en: { communityEyebrow: "COMMUNITY DIRECTORY", communityDirectory: "Farmers, buyers & brokers", directoryIntro: "Find people by role. Create an account and complete your profile to join the FarmWise community.", createProfile: "Create your profile", directoryEveryone: "Everyone", directoryFarmers: "Farmers", directoryBuyers: "Buyers & brokers", directoryGrowing: "Growing", farmerProfilesEmpty: "Farmer profiles will appear here when they create an account.", buyerProfilesEmpty: "Buyer and broker profiles will appear here after they create an account." },
-  hi: { communityEyebrow: "किसान समुदाय", communityDirectory: "किसान, खरीदार और दलाल", directoryIntro: "भूमिका के अनुसार लोगों को खोजें। फार्मवाइज़ समुदाय से जुड़ने के लिए खाता बनाएँ और अपनी प्रोफ़ाइल पूरी करें।", createProfile: "अपनी प्रोफ़ाइल बनाएँ", directoryEveryone: "सभी", directoryFarmers: "किसान", directoryBuyers: "खरीदार और दलाल", directoryGrowing: "उगा रहे हैं", farmerProfilesEmpty: "खाता बनाने पर किसानों की प्रोफ़ाइल यहाँ दिखाई देगी।", buyerProfilesEmpty: "खाता बनाने पर खरीदारों और दलालों की प्रोफ़ाइल यहाँ दिखाई देगी।" },
-  kn: { communityEyebrow: "ರೈತರ ಸಮುದಾಯ", communityDirectory: "ರೈತರು, ಖರೀದಿದಾರರು ಮತ್ತು ದಲ್ಲಾಳಿಗಳು", directoryIntro: "ಪಾತ್ರದ ಆಧಾರದ ಮೇಲೆ ಜನರನ್ನು ಹುಡುಕಿ. ಫಾರ್ಮ್‌ವೈಸ್ ಸಮುದಾಯಕ್ಕೆ ಸೇರಲು ಖಾತೆ ರಚಿಸಿ ಮತ್ತು ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಪೂರ್ಣಗೊಳಿಸಿ.", createProfile: "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ರಚಿಸಿ", directoryEveryone: "ಎಲ್ಲರೂ", directoryFarmers: "ರೈತರು", directoryBuyers: "ಖರೀದಿದಾರರು ಮತ್ತು ದಲ್ಲಾಳಿಗಳು", directoryGrowing: "ಬೆಳೆಯುತ್ತಿರುವುದು", farmerProfilesEmpty: "ಖಾತೆ ರಚಿಸಿದಾಗ ರೈತರ ಪ್ರೊಫೈಲ್‌ಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.", buyerProfilesEmpty: "ಖಾತೆ ರಚಿಸಿದಾಗ ಖರೀದಿದಾರರು ಮತ್ತು ದಲ್ಲಾಳಿಗಳ ಪ್ರೊಫೈಲ್‌ಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ." },
-  te: { communityEyebrow: "రైతుల సంఘం", communityDirectory: "రైతులు, కొనుగోలుదారులు మరియు బ్రోకర్లు", directoryIntro: "పాత్ర ఆధారంగా వ్యక్తులను కనుగొనండి. ఫార్మ్‌వైస్ సంఘంలో చేరడానికి ఖాతా సృష్టించి, మీ ప్రొఫైల్‌ను పూర్తి చేయండి.", createProfile: "మీ ప్రొఫైల్ సృష్టించండి", directoryEveryone: "అందరూ", directoryFarmers: "రైతులు", directoryBuyers: "కొనుగోలుదారులు మరియు బ్రోకర్లు", directoryGrowing: "పండిస్తున్నవి", farmerProfilesEmpty: "ఖాతా సృష్టించినప్పుడు రైతుల ప్రొఫైల్‌లు ఇక్కడ కనిపిస్తాయి.", buyerProfilesEmpty: "ఖాతా సృష్టించినప్పుడు కొనుగోలుదారులు, బ్రోకర్ల ప్రొఫైల్‌లు ఇక్కడ కనిపిస్తాయి." },
-  ta: { communityEyebrow: "விவசாயிகள் சமூகம்", communityDirectory: "விவசாயிகள், வாங்குபவர்கள் மற்றும் தரகர்கள்", directoryIntro: "பங்கு அடிப்படையில் நபர்களைக் கண்டறியுங்கள். FarmWise சமூகத்தில் சேர கணக்கை உருவாக்கி உங்கள் சுயவிவரத்தை நிறைவு செய்யுங்கள்.", createProfile: "உங்கள் சுயவிவரத்தை உருவாக்குங்கள்", directoryEveryone: "அனைவரும்", directoryFarmers: "விவசாயிகள்", directoryBuyers: "வாங்குபவர்கள் மற்றும் தரகர்கள்", directoryGrowing: "பயிரிடுவது", farmerProfilesEmpty: "கணக்கு உருவாக்கிய விவசாயிகளின் சுயவிவரங்கள் இங்கே தோன்றும்.", buyerProfilesEmpty: "கணக்கு உருவாக்கிய வாங்குபவர்கள் மற்றும் தரகர்களின் சுயவிவரங்கள் இங்கே தோன்றும்." },
+  en: { communityEyebrow: "COMMUNITY DIRECTORY", communityDirectory: "Farmers, buyers & brokers", directoryIntro: "Find people by role. Create an account and complete your profile to join the FarmWise community.", createProfile: "Create your profile", directoryEveryone: "Everyone", directoryFarmers: "Farmers", directoryBuyers: "Buyers & brokers", directoryGrowing: "Growing", farmerProfilesEmpty: "Farmer profiles will appear here when they create an account.", buyerProfilesEmpty: "No buyer or broker accounts yet.", buyerDirectoryEmptyHelp: "Choose Buyer / broker as your account type in Profile to join this list.", chooseAccountType: "Choose account type", accountType: "Account type", farmerAccountType: "Farmer", buyerAccountType: "Buyer / broker", adminAccountType: "Administrator" },
+  hi: { communityEyebrow: "किसान समुदाय", communityDirectory: "किसान, खरीदार और दलाल", directoryIntro: "भूमिका के अनुसार लोगों को खोजें। फार्मवाइज़ समुदाय से जुड़ने के लिए खाता बनाएँ और अपनी प्रोफ़ाइल पूरी करें।", createProfile: "अपनी प्रोफ़ाइल बनाएँ", directoryEveryone: "सभी", directoryFarmers: "किसान", directoryBuyers: "खरीदार और दलाल", directoryGrowing: "उगा रहे हैं", farmerProfilesEmpty: "खाता बनाने पर किसानों की प्रोफ़ाइल यहाँ दिखाई देगी।", buyerProfilesEmpty: "अभी कोई खरीदार या दलाल खाता नहीं है।", buyerDirectoryEmptyHelp: "इस सूची में शामिल होने के लिए प्रोफ़ाइल में खरीदार / दलाल चुनें।", chooseAccountType: "खाता प्रकार चुनें", accountType: "खाता प्रकार", farmerAccountType: "किसान", buyerAccountType: "खरीदार / दलाल", adminAccountType: "प्रशासक" },
+  kn: { communityEyebrow: "ರೈತರ ಸಮುದಾಯ", communityDirectory: "ರೈತರು, ಖರೀದಿದಾರರು ಮತ್ತು ದಲ್ಲಾಳಿಗಳು", directoryIntro: "ಪಾತ್ರದ ಆಧಾರದ ಮೇಲೆ ಜನರನ್ನು ಹುಡುಕಿ. ಫಾರ್ಮ್‌ವೈಸ್ ಸಮುದಾಯಕ್ಕೆ ಸೇರಲು ಖಾತೆ ರಚಿಸಿ ಮತ್ತು ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಪೂರ್ಣಗೊಳಿಸಿ.", createProfile: "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ರಚಿಸಿ", directoryEveryone: "ಎಲ್ಲರೂ", directoryFarmers: "ರೈತರು", directoryBuyers: "ಖರೀದಿದಾರರು ಮತ್ತು ದಲ್ಲಾಳಿಗಳು", directoryGrowing: "ಬೆಳೆಯುತ್ತಿರುವುದು", farmerProfilesEmpty: "ಖಾತೆ ರಚಿಸಿದಾಗ ರೈತರ ಪ್ರೊಫೈಲ್‌ಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.", buyerProfilesEmpty: "ಇನ್ನೂ ಖರೀದಿದಾರರು ಅಥವಾ ದಲ್ಲಾಳಿಗಳ ಖಾತೆಗಳಿಲ್ಲ.", buyerDirectoryEmptyHelp: "ಈ ಪಟ್ಟಿಗೆ ಸೇರಲು ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ಖರೀದಿದಾರ / ದಲ್ಲಾಳಿ ಆಯ್ಕೆಮಾಡಿ.", chooseAccountType: "ಖಾತೆಯ ಪ್ರಕಾರ ಆಯ್ಕೆಮಾಡಿ", accountType: "ಖಾತೆಯ ಪ್ರಕಾರ", farmerAccountType: "ರೈತ", buyerAccountType: "ಖರೀದಿದಾರ / ದಲ್ಲಾಳಿ", adminAccountType: "ನಿರ್ವಾಹಕರು" },
+  te: { communityEyebrow: "రైతుల సంఘం", communityDirectory: "రైతులు, కొనుగోలుదారులు మరియు బ్రోకర్లు", directoryIntro: "పాత్ర ఆధారంగా వ్యక్తులను కనుగొనండి. ఫార్మ్‌వైస్ సంఘంలో చేరడానికి ఖాతా సృష్టించి, మీ ప్రొఫైల్‌ను పూర్తి చేయండి.", createProfile: "మీ ప్రొఫైల్ సృష్టించండి", directoryEveryone: "అందరూ", directoryFarmers: "రైతులు", directoryBuyers: "కొనుగోలుదారులు మరియు బ్రోకర్లు", directoryGrowing: "పండిస్తున్నవి", farmerProfilesEmpty: "ఖాతా సృష్టించినప్పుడు రైతుల ప్రొఫైల్‌లు ఇక్కడ కనిపిస్తాయి.", buyerProfilesEmpty: "ఇంకా కొనుగోలుదారు లేదా బ్రోకర్ ఖాతాలు లేవు.", buyerDirectoryEmptyHelp: "ఈ జాబితాలో చేరడానికి ప్రొఫైల్‌లో కొనుగోలుదారు / బ్రోకర్ ఎంచుకోండి.", chooseAccountType: "ఖాతా రకాన్ని ఎంచుకోండి", accountType: "ఖాతా రకం", farmerAccountType: "రైతు", buyerAccountType: "కొనుగోలుదారు / బ్రోకర్", adminAccountType: "నిర్వాహకుడు" },
+  ta: { communityEyebrow: "விவசாயிகள் சமூகம்", communityDirectory: "விவசாயிகள், வாங்குபவர்கள் மற்றும் தரகர்கள்", directoryIntro: "பங்கு அடிப்படையில் நபர்களைக் கண்டறியுங்கள். FarmWise சமூகத்தில் சேர கணக்கை உருவாக்கி உங்கள் சுயவிவரத்தை நிறைவு செய்யுங்கள்.", createProfile: "உங்கள் சுயவிவரத்தை உருவாக்குங்கள்", directoryEveryone: "அனைவரும்", directoryFarmers: "விவசாயிகள்", directoryBuyers: "வாங்குபவர்கள் மற்றும் தரகர்கள்", directoryGrowing: "பயிரிடுவது", farmerProfilesEmpty: "கணக்கு உருவாக்கிய விவசாயிகளின் சுயவிவரங்கள் இங்கே தோன்றும்.", buyerProfilesEmpty: "இன்னும் வாங்குபவர் அல்லது தரகர் கணக்குகள் இல்லை.", buyerDirectoryEmptyHelp: "இந்தப் பட்டியலில் சேர சுயவிவரத்தில் வாங்குபவர் / தரகர் என்பதைத் தேர்ந்தெடுக்கவும்.", chooseAccountType: "கணக்கு வகையைத் தேர்ந்தெடுக்கவும்", accountType: "கணக்கு வகை", farmerAccountType: "விவசாயி", buyerAccountType: "வாங்குபவர் / தரகர்", adminAccountType: "நிர்வாகி" },
 };
 function useLanguage() {
   const context = useContext(LanguageContext);
@@ -575,7 +575,7 @@ function App() {
           {active === "Crop Guide" && <AgricultureGuide />}
           {active === "Farm Budget & Profit" && <FinancialForecastView token={getToken()} farm={farm} />}
           {active === "Analytics" && <Analytics />}
-          {active === "Profile" && <UserProfile user={user} onSaved={(updated) => { setUser(updated); notify("Profile changes saved."); }} />}
+          {active === "Profile" && <UserProfile user={user} onSaved={(updated) => { setUser(updated); setActive(updated.role === "buyer" ? "Crop Marketplace" : "Dashboard"); notify("Profile changes saved."); }} />}
         </div>
       </main>
       {toast && (
@@ -1733,7 +1733,8 @@ function BuyerView({
           {!visibleBuyers.length && !loading && (
             <div className="marketplace-empty panel">
               <strong>No buyers listed yet</strong>
-              <p>Buyer profiles will appear here when the backend buyer directory has been seeded.</p>
+              <p>{t("buyerDirectoryEmptyHelp")}</p>
+              <button className="outline-button" onClick={onCreateProfile}>{t("chooseAccountType")}</button>
             </div>
           )}
           {visibleBuyers.map((buyer) => (
@@ -2361,7 +2362,9 @@ function HarvestView({
   );
 }
 function UserProfile({ user, onSaved }: { user: User | null; onSaved: (user: User) => void }) {
+  const { t } = useLanguage();
   const [name, setName] = useState(user?.name ?? "");
+  const [role, setRole] = useState<"farmer" | "buyer">(user?.role === "buyer" ? "buyer" : "farmer");
   const [state, setState] = useState(user?.state ?? user?.location_name ?? "");
   const [district, setDistrict] = useState(user?.district ?? "");
   const [latitude, setLatitude] = useState<number | null>(user?.latitude ?? null);
@@ -2394,7 +2397,7 @@ function UserProfile({ user, onSaved }: { user: User | null; onSaved: (user: Use
     setSaving(true);
     setError("");
     try {
-      onSaved(await api.updateProfile({
+      const profile = {
         name,
         language: user?.language ?? "en",
         location_name: [district, state].filter(Boolean).join(", "),
@@ -2402,7 +2405,9 @@ function UserProfile({ user, onSaved }: { user: User | null; onSaved: (user: Use
         district,
         latitude,
         longitude,
-      }, token));
+        ...(user?.role === "admin" ? {} : { role }),
+      };
+      onSaved(await api.updateProfile(profile, token));
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Could not save account details.");
     } finally {
@@ -2453,7 +2458,7 @@ function UserProfile({ user, onSaved }: { user: User | null; onSaved: (user: Use
           <div className="profile-form">
             <div className="farm-identity">
               <div className="large-avatar">{user?.name?.slice(0, 2).toUpperCase()}</div>
-              <div><h2>{user?.name}</h2><p>{user?.role === "buyer" ? "Buyer / broker account" : "Farmer account"}</p></div>
+              <div><h2>{user?.name}</h2><p>{user?.role === "buyer" ? t("buyerAccountType") : user?.role === "admin" ? t("adminAccountType") : t("farmerAccountType")}</p></div>
             </div>
             <div className="form-grid">
               <label>FULL NAME<input value={name} onChange={(event) => setName(event.target.value)} /></label>
@@ -2461,7 +2466,14 @@ function UserProfile({ user, onSaved }: { user: User | null; onSaved: (user: Use
               <label>MOBILE NUMBER<input value={user?.phone ?? "Not added"} readOnly /></label>
               <label>STATE<input value={state} onChange={(event) => setState(event.target.value)} /></label>
               <label>DISTRICT<input value={district} onChange={(event) => setDistrict(event.target.value)} /></label>
-              <label>ACCOUNT TYPE<input value={user?.role ?? "farmer"} readOnly /></label>
+              <label>{t("accountType")}
+                {user?.role === "admin" ? <input value={t("adminAccountType")} readOnly /> : (
+                  <select value={role} onChange={(event) => setRole(event.target.value as "farmer" | "buyer")}>
+                    <option value="farmer">{t("farmerAccountType")}</option>
+                    <option value="buyer">{t("buyerAccountType")}</option>
+                  </select>
+                )}
+              </label>
             </div>
             <div className="profile-location-details">
               <div><span className="eyebrow green">{user?.role === "buyer" ? "SAVED LOCATION" : "FARM LOCATION"}</span><strong>{[district, state].filter(Boolean).join(", ") || user?.location_name || "Add your district and state"}</strong>

@@ -31,6 +31,15 @@ docker compose up --build
 
 The container API is available at `http://localhost:8000`. Set `DATABASE_URL` and `JWT_SECRET` from `.env.example` in real environments. Do not commit secrets.
 
+## Runtime environment
+
+Set `APP_ENV=production` on production hosts. The API refuses to start when
+`JWT_SECRET` is the development placeholder or contains fewer than 32 UTF-8
+bytes. Generate a unique secret (for example, with Python's
+`secrets.token_urlsafe(48)`) and store it in the host's secret manager. Do not
+reuse the example value or commit a real secret. Local development defaults to
+`APP_ENV=development`; production hosts must set the environment explicitly.
+
 ## Main endpoints
 
 - `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `GET /api/v1/auth/me`

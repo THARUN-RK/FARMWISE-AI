@@ -17,6 +17,7 @@ services:
   backend:
     build: .
     environment:
+      APP_ENV: development
       DATABASE_URL: postgresql+psycopg://farmwise:farmwise@postgres:5432/farmwise
       # Values in .env are used by Docker Compose for interpolation.  Do not
       # bake credentials into the image or commit them to this file.

@@ -97,20 +97,12 @@ const directoryTranslations: Partial<Record<Language, Record<string, string>>> =
   te: { communityEyebrow: "రైతుల సంఘం", communityDirectory: "రైతులు, కొనుగోలుదారులు మరియు బ్రోకర్లు", directoryIntro: "పాత్ర ఆధారంగా వ్యక్తులను కనుగొనండి. ఫార్మ్‌వైస్ సంఘంలో చేరడానికి ఖాతా సృష్టించి, మీ ప్రొఫైల్‌ను పూర్తి చేయండి.", createProfile: "మీ ప్రొఫైల్ సృష్టించండి", directoryEveryone: "అందరూ", directoryFarmers: "రైతులు", directoryBuyers: "కొనుగోలుదారులు మరియు బ్రోకర్లు", directoryGrowing: "పండిస్తున్నవి", farmerProfilesEmpty: "ఖాతా సృష్టించినప్పుడు రైతుల ప్రొఫైల్‌లు ఇక్కడ కనిపిస్తాయి.", buyerProfilesEmpty: "ఖాతా సృష్టించినప్పుడు కొనుగోలుదారులు, బ్రోకర్ల ప్రొఫైల్‌లు ఇక్కడ కనిపిస్తాయి." },
   ta: { communityEyebrow: "விவசாயிகள் சமூகம்", communityDirectory: "விவசாயிகள், வாங்குபவர்கள் மற்றும் தரகர்கள்", directoryIntro: "பங்கு அடிப்படையில் நபர்களைக் கண்டறியுங்கள். FarmWise சமூகத்தில் சேர கணக்கை உருவாக்கி உங்கள் சுயவிவரத்தை நிறைவு செய்யுங்கள்.", createProfile: "உங்கள் சுயவிவரத்தை உருவாக்குங்கள்", directoryEveryone: "அனைவரும்", directoryFarmers: "விவசாயிகள்", directoryBuyers: "வாங்குபவர்கள் மற்றும் தரகர்கள்", directoryGrowing: "பயிரிடுவது", farmerProfilesEmpty: "கணக்கு உருவாக்கிய விவசாயிகளின் சுயவிவரங்கள் இங்கே தோன்றும்.", buyerProfilesEmpty: "கணக்கு உருவாக்கிய வாங்குபவர்கள் மற்றும் தரகர்களின் சுயவிவரங்கள் இங்கே தோன்றும்." },
 };
-const directoryDemoTranslations: Partial<Record<Language, Record<string, string>>> = {
-  en: { createRealAccount: "Create a real account", directoryDemoNotice: "Demo Mode uses sample profiles. They are not saved to the shared directory. Create a real account to appear in the list." },
-  hi: { createRealAccount: "वास्तविक खाता बनाएँ", directoryDemoNotice: "डेमो मोड में नमूना प्रोफ़ाइलें दिखाई जाती हैं। वे साझा सूची में सेव नहीं होतीं। सूची में दिखने के लिए वास्तविक खाता बनाएँ।" },
-  kn: { createRealAccount: "ನಿಜವಾದ ಖಾತೆ ರಚಿಸಿ", directoryDemoNotice: "ಡೆಮೋ ಮೋಡ್ ಮಾದರಿ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ತೋರಿಸುತ್ತದೆ. ಅವು ಹಂಚಿದ ಪಟ್ಟಿಯಲ್ಲಿ ಉಳಿಯುವುದಿಲ್ಲ. ಪಟ್ಟಿಯಲ್ಲಿ ಕಾಣಲು ನಿಜವಾದ ಖಾತೆ ರಚಿಸಿ." },
-  te: { createRealAccount: "నిజమైన ఖాతా సృష్టించండి", directoryDemoNotice: "డెమో మోడ్ నమూనా ప్రొఫైల్‌లను చూపుతుంది. అవి అందరికీ కనిపించే జాబితాలో సేవ్ కావు. జాబితాలో కనిపించడానికి నిజమైన ఖాతా సృష్టించండి." },
-  ta: { createRealAccount: "உண்மையான கணக்கை உருவாக்குங்கள்", directoryDemoNotice: "டெமோ பயன்முறையில் மாதிரி சுயவிவரங்கள் காட்டப்படும். அவை பகிரப்பட்ட பட்டியலில் சேமிக்கப்படாது. பட்டியலில் தோன்ற உண்மையான கணக்கை உருவாக்குங்கள்." },
-};
 function useLanguage() {
   const context = useContext(LanguageContext);
   return {
     ...context,
     t: (key: string) =>
       directoryTranslations[context.language]?.[key] ??
-      directoryDemoTranslations[context.language]?.[key] ??
       context.dynamicTranslations[context.language]?.[key] ??
       marketplacePageTranslations[context.language]?.[key] ??
       translations[context.language]?.[key] ??
@@ -181,70 +173,6 @@ const crops: Crop[] = [
       "High yield potential, but requires careful harvest timing and has a more variable selling window.",
   },
 ];
-const markets: Market[] = [
-  {
-    name: "Guntur Central Market",
-    type: "APMC market",
-    distance: "32 km",
-    price: 21,
-    transport: 1.5,
-    charges: 0.4,
-    demand: "Very high",
-    arrivals: "1,240 t",
-  },
-  {
-    name: "Mangalagiri APMC",
-    type: "Wholesale mandi",
-    distance: "18 km",
-    price: 18,
-    transport: 1,
-    charges: 0.4,
-    demand: "High",
-    arrivals: "680 t",
-  },
-  {
-    name: "Vijayawada Wholesale",
-    type: "Wholesale market",
-    distance: "45 km",
-    price: 22,
-    transport: 4,
-    charges: 0.5,
-    demand: "Medium",
-    arrivals: "910 t",
-  },
-];
-const buyers = [
-  {
-    initials: "RT",
-    name: "Rajesh Traders",
-    type: "Wholesaler",
-    location: "Guntur APMC",
-    offer: "INR 17–19 / kg",
-    quantity: "1–5 tonnes",
-    match: 94,
-    verification: "Phone · location · business",
-  },
-  {
-    initials: "FC",
-    name: "FreshKart Collective",
-    type: "FPO / aggregator",
-    location: "Vijayawada",
-    offer: "INR 18–21 / kg",
-    quantity: "2–8 tonnes",
-    match: 88,
-    verification: "Phone · location",
-  },
-  {
-    initials: "SP",
-    name: "Sri Padmavati Foods",
-    type: "Processor",
-    location: "Tenali",
-    offer: "INR 18–20 / kg",
-    quantity: "1–4 tonnes",
-    match: 82,
-    verification: "Location · business",
-  },
-];
 const navItems: { label: Module; icon: string }[] = [
   { label: "Dashboard", icon: "⌂" },
   { label: "My Farm", icon: "⌁" },
@@ -278,20 +206,16 @@ function App() {
     [farm, setFarm] = useState<Farm | null>(null),
     [apiRecommendations, setApiRecommendations] = useState<ApiCrop[]>([]);
   const [active, setActive] = useState<Module>("Dashboard"),
-    [demo, setDemo] = useState(false),
     [menuOpen, setMenuOpen] = useState(false);
   const [pendingContact, setPendingContact] = useState<{ listingId?: number; buyerUserId?: number } | null>(null);
   const [toast, setToast] = useState(""),
-    [enquiryOpen, setEnquiryOpen] = useState(false),
-    [enquirySent, setEnquirySent] = useState(false),
     [plannerLoading, setPlannerLoading] = useState(false),
     [searchOpen, setSearchOpen] = useState(false),
     [notificationsOpen, setNotificationsOpen] = useState(false),
     [backendConnected, setBackendConnected] = useState<boolean | null>(null);
   const [selectedCrop, setSelectedCrop] = useState(crops[0]),
     [water, setWater] = useState("Medium"),
-    [soil, setSoil] = useState("Loamy"),
-    [quantity, setQuantity] = useState("2");
+    [soil, setSoil] = useState("Loamy");
   const changeLanguage = (nextLanguage: Language) => {
     setLanguage(nextLanguage);
     localStorage.setItem("farmwise_language", nextLanguage);
@@ -376,42 +300,45 @@ function App() {
         : [],
     [apiRecommendations, farm],
   );
-  const rankedMarkets = useMemo(
-    () =>
-      markets
-        .map((market) => ({
-          ...market,
-          net: market.price - market.transport - market.charges,
-        }))
-        .sort((a, b) => b.net - a.net),
-    [],
-  );
+  useEffect(() => {
+    if (rankedCrops.length && !rankedCrops.some((crop) => crop.name === selectedCrop.name)) {
+      setSelectedCrop(rankedCrops[0]);
+    }
+  }, [rankedCrops, selectedCrop.name]);
   const notify = (message: string) => {
     setToast(message);
     window.setTimeout(() => setToast(""), 2800);
-  };
-  const startDemo = () => {
-    setDemo(true);
-    setAuthenticated(true);
-    setActive("Dashboard");
-    notify("Demo mode is for demonstration only. Log in to load your account.");
   };
   const startContact = (intent: { listingId?: number; buyerUserId?: number }) => {
     setPendingContact(intent);
     setActive("Messages");
   };
-  const generatePlan = () => {
+  const generatePlan = async () => {
+    const token = getToken();
+    if (!token || !farm) {
+      notify("Save your farm profile before generating crop recommendations.");
+      setActive("My Farm");
+      return;
+    }
     setPlannerLoading(true);
-    window.setTimeout(() => {
+    try {
+      const savedFarm = await api.updateFarm(farm.id, {
+        land_size_acres: farm.land_size_acres,
+        soil_type: soil,
+        water_availability: water,
+        current_season: farm.current_season,
+        budget: farm.budget,
+        previous_crop: farm.previous_crop,
+      }, token);
+      setFarm(savedFarm);
+      const result = await api.recommendations(savedFarm.id, token);
+      setApiRecommendations(result.recommendations);
+      notify(result.recommendations.length ? "Farm-specific crop recommendations updated." : "No recommendations are available for these farm details yet.");
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "Could not load crop recommendations.");
+    } finally {
       setPlannerLoading(false);
-      setActive("Crop Planner");
-      notify("Your crop plan is ready.");
-    }, 850);
-  };
-  const sendEnquiry = () => {
-    setEnquirySent(true);
-    setEnquiryOpen(false);
-    notify("Enquiry sent successfully.");
+    }
   };
   if (authLoading)
     return (
@@ -446,7 +373,6 @@ function App() {
           setAuthMode(null);
           return result;
         }}
-        onDemo={startDemo}
       />
       </LanguageContext.Provider>
     );
@@ -577,10 +503,7 @@ function App() {
               farm={farm}
               go={setActive}
               rankedCrops={rankedCrops}
-              rankedMarkets={demo ? rankedMarkets : []}
-              demo={demo}
-              onEnquiry={() => setEnquiryOpen(true)}
-              onDemo={startDemo}
+              rankedMarkets={[]}
             />
           )}
           {active === "My Farm" && (
@@ -598,6 +521,8 @@ function App() {
           {active === "Crop Planner" && (
             <CropPlanner
               crops={rankedCrops}
+              farm={farm}
+              location={user?.location_name ?? "Add a location in your profile"}
               selectedCrop={selectedCrop}
               setSelectedCrop={setSelectedCrop}
               soil={soil}
@@ -606,28 +531,19 @@ function App() {
               setWater={setWater}
               loading={plannerLoading}
               generatePlan={generatePlan}
+              onOpenFarm={() => setActive("My Farm")}
             />
           )}
           {active === "Market Intelligence" && (
-            <MarketView
-              markets={demo ? rankedMarkets : []}
-              quantity={quantity}
-              setQuantity={setQuantity}
-              notify={notify}
-            />
+            <MarketView />
           )}
           {active === "Online Marketplaces" && <OnlineMarketplaces />}
           {active === "Buyers & Brokers" && (
             <BuyerView
               token={getToken()}
-              demo={demo}
               role="farmer"
               onCreateProfile={() => {
-                if (demo) {
-                  setDemo(false);
-                  setAuthenticated(false);
-                  setAuthMode("signup");
-                } else setActive("Profile");
+                setActive("Profile");
               }}
               onContact={startContact}
             />
@@ -635,7 +551,6 @@ function App() {
           {active === "Crop Marketplace" && (
             <BuyerView
               token={getToken()}
-              demo={demo}
               role={user?.role === "buyer" ? "buyer" : "farmer"}
               currentUserId={user?.id}
               onCreateProfile={() => setActive("Profile")}
@@ -659,7 +574,7 @@ function App() {
           )}
           {active === "Crop Guide" && <AgricultureGuide />}
           {active === "Farm Budget & Profit" && <FinancialForecastView token={getToken()} farm={farm} />}
-          {active === "Analytics" && <Analytics demo={demo} />}
+          {active === "Analytics" && <Analytics />}
           {active === "Profile" && <UserProfile user={user} onSaved={(updated) => { setUser(updated); notify("Profile changes saved."); }} />}
         </div>
       </main>
@@ -668,15 +583,6 @@ function App() {
           <span>✓</span>
           {toast}
         </div>
-      )}
-      {enquiryOpen && (
-        <EnquiryModal
-          quantity={quantity}
-          setQuantity={setQuantity}
-          sent={enquirySent}
-          onClose={() => setEnquiryOpen(false)}
-          onSend={sendEnquiry}
-        />
       )}
       {searchOpen && <SearchPanel token={getToken()} onClose={() => setSearchOpen(false)} onNavigate={(module) => { setActive(user?.role === "buyer" ? "Crop Marketplace" : module); setSearchOpen(false); }} />}
       {notificationsOpen && <NotificationsPanel token={getToken()} onClose={() => setNotificationsOpen(false)} onNavigate={(module) => { setActive(user?.role === "buyer" ? "Crop Marketplace" : module); setNotificationsOpen(false); }} />}
@@ -841,14 +747,12 @@ function Landing({
   onLogin,
   onSignup,
   onGoogle,
-  onDemo,
 }: {
   authMode: "login" | "signup" | null;
   setAuthMode: (mode: "login" | "signup" | null) => void;
   onLogin: (identifier: string, password: string) => Promise<void>;
   onSignup: (payload: { name: string; phone: string; email: string; password: string; confirm_password: string; role: string; state: string; district: string; language: Language }) => Promise<void>;
   onGoogle: (credential: string, phone?: string) => Promise<Awaited<ReturnType<typeof api.googleLogin>>>;
-  onDemo: () => void;
 }) {
   const { t } = useLanguage();
   return (
@@ -892,9 +796,6 @@ function Landing({
             <button className="hero-cta" onClick={() => setAuthMode("signup")}>
               Build my farm plan <span>→</span>
             </button>
-            <button className="demo-cta" onClick={onDemo}>
-              <span>▷</span> Explore live demo
-            </button>
           </div>
           <div className="hero-proof">
             <div className="proof-avatars">
@@ -915,9 +816,9 @@ function Landing({
           />
           <div className="photo-overlay" />
           <div className="hero-photo-card">
-            <span className="live-dot" /> <strong>Today&apos;s decision</strong>
-            <small>Groundnut · 92% suitable</small>
-            <b>+ INR 18,500 / acre</b>
+            <span className="live-dot" /> <strong>Example estimate</strong>
+            <small>Crop suitability preview</small>
+            <b>Based on farm inputs</b>
           </div>
           <div className="photo-location">Karnataka · Kharif season</div>
         </div>
@@ -1177,19 +1078,12 @@ function Dashboard({
   farm,
   go,
   rankedCrops,
-  rankedMarkets,
-  demo,
-  onEnquiry,
-  onDemo,
 }: {
   user: User | null;
   farm: Farm | null;
   go: (module: Module) => void;
   rankedCrops: Crop[];
   rankedMarkets: (Market & { net: number })[];
-  demo: boolean;
-  onEnquiry: () => void;
-  onDemo: () => void;
 }) {
   const { t } = useLanguage();
   return (
@@ -1205,7 +1099,6 @@ function Dashboard({
           </p>
         </div>
         <div className="intro-actions">
-          <span className="demo-badge">● DEMO DATA</span>
           <button className="primary-button" onClick={() => go("My Farm")}>
             + Update farm inputs
           </button>
@@ -1275,9 +1168,6 @@ function Dashboard({
             <h2>Your decision path</h2>
           </div>
         </div>
-        <button className="link-button" onClick={onDemo}>
-          Reset demo ↻
-        </button>
       </div>
       <div className="journey-card">
         <Journey
@@ -1289,14 +1179,14 @@ function Dashboard({
         />
         <Journey
           label="Sow"
-          value="18–25 Jun"
-          status="Optimal window"
+          value={farm ? "Open crop planner" : "Add farm first"}
+          status={farm ? "Build a crop plan" : "Complete farm profile"}
           icon="◷"
         />
         <Journey
           label="Harvest"
-          value={demo ? "2.8 tonnes" : "No harvest yet"}
-          status={demo ? "In 95 days" : "Add harvest"}
+          value="No harvest yet"
+          status="Add harvest"
           icon="◒"
         />
         <Journey
@@ -1307,8 +1197,8 @@ function Dashboard({
         />
         <Journey
           label="Connect"
-          value={demo ? "2 buyers" : "No matches yet"}
-          status={demo ? "94% top match" : "Add harvest"}
+          value="No matches yet"
+          status="Add harvest"
           icon="♧"
         />
       </div>
@@ -1328,7 +1218,7 @@ function Dashboard({
         <div className="panel recommendation-panel">
           <div className="panel-head">
             <div>
-              <h3>Best fit for your Kharif season</h3>
+              <h3>Farm-specific crop recommendations</h3>
               <p>
                 Weighted against your soil, water, budget and nearby demand.
               </p>
@@ -1363,26 +1253,26 @@ function Dashboard({
             <span className="weather-symbol">◒</span>
           </div>
           <div className="weather-main">
-            <strong>{demo ? "28°" : "—"}</strong>
+            <strong>—</strong>
             <span>
-              {demo ? "Partly cloudy" : "Weather unavailable"}
+              Weather unavailable
               <br />
-              <b>{demo ? "42% rain probability" : "Connect weather provider"}</b>
+              <b>Connect weather provider</b>
             </span>
           </div>
           <div className="weather-days">
             <span>
-              WED <b>{demo ? "29°" : "—"}</b>
+              WED <b>—</b>
             </span>
             <span>
-              THU <b>{demo ? "27°" : "—"}</b>
+              THU <b>—</b>
             </span>
             <span>
-              FRI <b>{demo ? "30°" : "—"}</b>
+              FRI <b>—</b>
             </span>
           </div>
           <div className="alert-note">
-            <span>!</span> {demo ? "Rain may affect land preparation this week." : "Alerts will appear after farm data is available."}
+            <span>!</span> Alerts will appear after farm data is available.
           </div>
         </div>
       </div>
@@ -1441,12 +1331,9 @@ function Dashboard({
               <p className="eyebrow">WHOM TO CONTACT</p>
               <h3>Buyer matches</h3>
             </div>
-            <span className="match-pill">{demo ? "3 found" : "No harvest match"}</span>
+            <span className="match-pill">No harvest match</span>
           </div>
-          {(demo ? buyers.slice(0, 2) : []).map((buyer) => (
-            <BuyerRow key={buyer.name} buyer={buyer} onEnquiry={onEnquiry} />
-          ))}
-          {!demo && <p className="empty-state">Record a harvest to see buyer matches for your crop.</p>}
+          <p className="empty-state">Record a harvest to see buyer matches for your crop.</p>
           <button
             className="full-width-link"
             onClick={() => go("Buyers & Brokers")}
@@ -1467,9 +1354,9 @@ function Dashboard({
             Estimates compared with a typical local crop-to-market decision.
           </p>
         </div>
-        <ImpactStat value={demo ? "+12.4%" : "—"} label="Net realization" />
-        <ImpactStat value={demo ? "−18%" : "—"} label="Transport cost" />
-        <ImpactStat value={demo ? "74%" : "—"} label="Water efficiency" />
+        <ImpactStat value="—" label="Net realization" />
+        <ImpactStat value="—" label="Transport cost" />
+        <ImpactStat value="—" label="Water efficiency" />
         <button className="cream-button" onClick={() => go("Analytics")}>
           Open analytics <span>→</span>
         </button>
@@ -1477,7 +1364,7 @@ function Dashboard({
       <footer className="app-footer">
         <span>FarmWise AI</span>
         <span>Decision support for better farm outcomes</span>
-        <span>All values are estimates · Demo data</span>
+        <span>Estimates are decision support only · Outcomes are not guaranteed</span>
       </footer>
     </>
   );
@@ -1485,6 +1372,8 @@ function Dashboard({
 
 function CropPlanner({
   crops,
+  farm,
+  location,
   selectedCrop,
   setSelectedCrop,
   soil,
@@ -1493,8 +1382,11 @@ function CropPlanner({
   setWater,
   loading,
   generatePlan,
+  onOpenFarm,
 }: {
   crops: Crop[];
+  farm: Farm | null;
+  location: string;
   selectedCrop: Crop;
   setSelectedCrop: (crop: Crop) => void;
   soil: string;
@@ -1503,7 +1395,16 @@ function CropPlanner({
   setWater: (value: string) => void;
   loading: boolean;
   generatePlan: () => void;
+  onOpenFarm: () => void;
 }) {
+  if (!crops.length) return <>
+    <PageHeading eyebrow="CROP PLANNER" title="Personal crop recommendations" text="Recommendations are calculated from your saved farm profile and current backend data." />
+    <div className="panel empty-state">
+      <strong>No crop recommendations are available yet.</strong>
+      <p>Save your farm location, land size, soil, water availability, season and budget to request a real recommendation.</p>
+      <button className="primary-button" onClick={farm ? generatePlan : onOpenFarm}>{loading ? "Loading recommendations…" : farm ? "Retry recommendations" : "Complete your farm profile →"}</button>
+    </div>
+  </>;
   return (
     <>
       <PageHeading
@@ -1523,19 +1424,19 @@ function CropPlanner({
           <label>
             LOCATION
             <div className="input-with-icon">
-              ⌖<input value="Guntur, Andhra Pradesh" readOnly />
+              ⌖<input value={location} readOnly />
             </div>
           </label>
           <div className="two-fields">
             <label>
               LAND SIZE
-              <input value="2 acres" readOnly />
+              <input value={farm ? `${farm.land_size_acres} acres` : "No farm saved"} readOnly />
             </label>
             <label>
               SEASON
               <select>
-                <option>Kharif 2025</option>
-                <option>Rabi 2025</option>
+                {farm && <option>{farm.current_season}</option>}
+                {!farm && <option>No season saved</option>}
               </select>
             </label>
           </div>
@@ -1558,7 +1459,7 @@ function CropPlanner({
           </label>
           <label>
             AVAILABLE BUDGET
-            <input value="INR 50,000" readOnly />
+            <input value={farm ? `INR ${farm.budget.toLocaleString("en-IN")}` : "No budget saved"} readOnly />
           </label>
           <button className="primary-button full" onClick={generatePlan}>
             {loading ? (
@@ -1581,7 +1482,7 @@ function CropPlanner({
               <span className="eyebrow green">YOUR TOP OPTIONS</span>
               <h2>Built around your farm</h2>
             </div>
-            <span className="data-tag">SIMULATED MARKET DATA</span>
+            <span className="data-tag">FARM PROFILE DATA</span>
           </div>
           {crops.map((crop, i) => (
             <CropRecommendation
@@ -1616,166 +1517,44 @@ function CropPlanner({
           <p>{selectedCrop.reason}</p>
         </div>
         <div className="score-breakdown">
-          <ScoreBar label="Soil compatibility" value={95} />
-          <ScoreBar label="Water fit" value={88} />
-          <ScoreBar label="Season timing" value={92} />
-          <ScoreBar label="Profit potential" value={85} />
+          <p>Farm-specific suitability score: <strong>{selectedCrop.score}%</strong></p>
+          <p>{selectedCrop.risk} market risk · {selectedCrop.water} water requirement</p>
         </div>
         <div className="explain-list">
-          <span>✓ Fits your loamy soil profile</span>
-          <span>✓ Works with medium water availability</span>
-          <span>✓ Active demand in nearby markets</span>
-          <span>✓ Production cost fits your budget</span>
+          <p>{selectedCrop.reason}</p>
         </div>
       </section>
     </>
   );
 }
 
-function MarketView({
-  markets: rankedMarkets,
-  quantity,
-  setQuantity,
-  notify,
-}: {
-  markets: (Market & { net: number })[];
-  quantity: string;
-  setQuantity: (value: string) => void;
-  notify: (message: string) => void;
-}) {
-  const [selected, setSelected] = useState(rankedMarkets[0] ?? null);
+function MarketView() {
+  const [marketLocations, setMarketLocations] = useState<Array<{ id: number; name: string; location_name: string }>>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    api.markets()
+      .then((result) => { if (!cancelled) setMarketLocations(result); })
+      .catch((loadError) => { if (!cancelled) setError(loadError instanceof Error ? loadError.message : "Could not load market locations."); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
   return (
     <>
-      <PageHeading
-        eyebrow="MARKET INTELLIGENCE"
-        title="Where should you sell?"
-        text="The highest quote is not always the highest take-home value. Compare the journey, costs and demand before you choose."
-      />
-      <div className="market-workspace">
-        <div className="market-controls panel">
-          <div className="panel-head">
-            <div>
-              <h3>Harvest details</h3>
-              <p>Use your expected harvest to compare selling options.</p>
-            </div>
-            <span className="data-tag">DEMO DATA</span>
-          </div>
-          <label>
-            CROP
-            <select>
-              <option>Groundnut</option>
-              <option>Tomato</option>
-              <option>Chilli</option>
-            </select>
-          </label>
-          <div className="two-fields">
-            <label>
-              QUANTITY (TONNES)
-              <input
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-              />
-            </label>
-            <label>
-              GRADE
-              <select>
-                <option>Grade A</option>
-                <option>Grade B</option>
-              </select>
-            </label>
-          </div>
-          <label>
-            EXPECTED HARVEST DATE
-            <input value="18 September 2025" readOnly />
-          </label>
-          <button
-            className="primary-button full"
-            onClick={() => notify("Market options refreshed for your harvest.")}
-          >
-            Find best selling options →
-          </button>
+      <PageHeading eyebrow="MARKET INTELLIGENCE" title="Markets from the FarmWise service" text="Browse registered market locations. Price comparisons will be available when current price and transport data is published." />
+      {error && <div className="marketplace-error">{error}</div>}
+      {loading ? <div className="panel empty-state">Loading market locations…</div> : marketLocations.length ? (
+        <div className="market-cards">
+          {marketLocations.map((market) => (
+            <article className="market-card" key={market.id}>
+              <div className="market-card-main"><span className="eyebrow">REGISTERED MARKET</span><h3>{market.name}</h3><p>{market.location_name}</p></div>
+            </article>
+          ))}
         </div>
-        <div className="market-visual panel">
-          <div className="market-map tall">
-            <div className="map-grid" />
-            <span className="map-label farmer">YOUR FARM</span>
-            {rankedMarkets.map((market, i) => (
-              <button
-                key={market.name}
-                className={`map-pin pin-${i + 1} ${selected?.name === market.name ? "selected" : ""}`}
-                onClick={() => setSelected(market)}
-              >
-                ⌖<small>{market.name.split(" ")[0]}</small>
-              </button>
-            ))}
-            <div className="route-line" />
-          </div>
-          <div className="map-footer">
-            <span>
-              <i className="you-dot" /> Your location
-            </span>
-            <span>
-              <i className="market-dot" /> APMC / mandi
-            </span>
-            <button>Open map ↗</button>
-          </div>
-        </div>
-      </div>
-      <div className="market-heading">
-        <div>
-          <p className="eyebrow green">RANKED BY NET REALIZATION</p>
-          <h2>Nearby markets</h2>
-        </div>
-        <span>Last updated · 16 Sep 2025</span>
-      </div>
-      <div className="market-cards">
-        {rankedMarkets.map((market, i) => (
-          <button
-            className={
-              selected?.name === market.name
-                ? "market-card chosen"
-                : "market-card"
-            }
-            key={market.name}
-            onClick={() => setSelected(market)}
-          >
-            <div className="market-rank">0{i + 1}</div>
-            <div className="market-card-main">
-              <span className="eyebrow">{market.type}</span>
-              <h3>{market.name}</h3>
-              <p>
-                {market.distance} · {market.demand} buyer demand
-              </p>
-              <div className="market-card-tags">
-                <span>Arrivals {market.arrivals}</span>
-                <span>Est. {market.charges.toFixed(2)} charges</span>
-              </div>
-            </div>
-            <div className="market-card-values">
-              <small>QUOTE</small>
-              <strong>
-                INR {market.price.toFixed(2)}
-                <i>/kg</i>
-              </strong>
-              <small>NET REALIZATION</small>
-              <b>
-                INR {market.net.toFixed(2)}
-                <i>/kg</i>
-              </b>
-            </div>
-            {i === 0 && <span className="recommended-label">Recommended</span>}
-          </button>
-        ))}
-      </div>
-      <div className="tradeoff-banner">
-        <span>↗</span>
-        <div>
-          <strong>Smart trade-off</strong>
-          <p>
-            {selected ? <>{selected.name} leaves you with{" "}<b>INR {selected.net.toFixed(2)} / kg</b> after estimated transport and market charges. FarmWise ranks what you take home, not just the quote.</> : "Add a harvest to compare markets using your crop, quantity and grade."}
-          </p>
-        </div>
-      </div>
+      ) : !error ? <div className="panel empty-state"><strong>No market locations are registered yet.</strong><p>Market locations will appear here when they are added to the FarmWise service.</p></div> : null}
     </>
   );
 }
@@ -1825,14 +1604,12 @@ function OnlineMarketplaces() {
 
 function BuyerView({
   token,
-  demo,
   role,
   currentUserId,
   onCreateProfile,
   onContact,
 }: {
   token: string | null;
-  demo: boolean;
   role: "farmer" | "buyer";
   currentUserId?: number;
   onCreateProfile: () => void;
@@ -1842,11 +1619,11 @@ function BuyerView({
   const [directory, setDirectory] = useState<BuyerProfile[]>([]);
   const [people, setPeople] = useState<DirectoryProfile[]>([]);
   const [listings, setListings] = useState<CropListing[]>([]);
-  const [loading, setLoading] = useState(Boolean(token) && !demo);
+  const [loading, setLoading] = useState(Boolean(token));
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!token || demo) {
+    if (!token) {
       setLoading(false);
       return;
     }
@@ -1871,23 +1648,10 @@ function BuyerView({
     return () => {
       cancelled = true;
     };
-  }, [token, demo]);
+  }, [token]);
 
-  const demoDirectory: BuyerProfile[] = buyers.map((buyer, index) => ({
-    id: index + 1,
-    name: buyer.name,
-    business_type: buyer.type,
-    location_name: buyer.location,
-    verification_status: "verified",
-    verification_fields: buyer.verification,
-    rating: 4.4,
-    phone: `+91900000000${index}`,
-    email: `buyer${index + 1}@demo.farmwise`,
-  }));
-  const visibleBuyers = demo ? demoDirectory : directory.filter((buyer) => buyer.account_id);
-  const farmerDirectory = demo
-    ? [{ id: -1, name: "Ravi Kumar", location: "Guntur, Andhra Pradesh", crops: "Tomato, chilli" }]
-    : people.filter((person) => person.type === "farmer").map((person) => ({ ...person, crops: Array.from(new Set(listings.filter((listing) => listing.farmer.account_id === person.id).map((listing) => listing.crop))).join(", ") }));
+  const visibleBuyers = directory.filter((buyer) => buyer.account_id);
+  const farmerDirectory = people.filter((person) => person.type === "farmer").map((person) => ({ ...person, crops: Array.from(new Set(listings.filter((listing) => listing.farmer.account_id === person.id).map((listing) => listing.crop))).join(", ") }));
   const [directoryType, setDirectoryType] = useState<"all" | "farmer" | "buyer">("all");
   const visibleListings = listings.filter((listing) =>
     role === "farmer" || listing.farmer.account_id !== currentUserId,
@@ -1905,10 +1669,9 @@ function BuyerView({
       {role === "farmer" && <section className="people-directory panel">
         <div className="marketplace-section-heading">
           <div><span className="eyebrow green">{t("communityEyebrow")}</span><h2>{t("communityDirectory")}</h2></div>
-          <button className="primary-button" onClick={onCreateProfile}>{demo ? t("createRealAccount") : t("createProfile")}</button>
+          <button className="primary-button" onClick={onCreateProfile}>{t("createProfile")}</button>
         </div>
         <p className="directory-intro">{t("directoryIntro")}</p>
-        {demo && <p className="directory-demo-notice" role="note">{t("directoryDemoNotice")}</p>}
         <div className="directory-filters" role="group" aria-label="Filter people by type">
           {(["all", "farmer", "buyer"] as const).map((type) => <button key={type} className={directoryType === type ? "active" : ""} onClick={() => setDirectoryType(type)}>{type === "all" ? t("directoryEveryone") : type === "farmer" ? t("directoryFarmers") : t("directoryBuyers")}</button>)}
         </div>
@@ -1927,7 +1690,7 @@ function BuyerView({
               <span className="eyebrow green">FARMER HARVESTS</span>
               <h2>Fresh from the farm</h2>
             </div>
-            <span className="marketplace-count">{demo ? "Demo" : visibleListings.length}</span>
+            <span className="marketplace-count">{visibleListings.length}</span>
           </div>
           {loading && <p className="empty-state">Loading farmer listings…</p>}
           {!loading && !visibleListings.length && (
@@ -2527,11 +2290,6 @@ function HarvestView({
         title="Show buyers what you have grown."
         text="Take a crop photo, add harvest details, and share your listing with the buyer directory."
       />
-      {!token && (
-        <p className="harvest-error">
-          Demo mode is read-only. Log in to your farmer account with the backend running to publish harvests.
-        </p>
-      )}
       <div className="harvest-layout">
         <form className="harvest-form panel" onSubmit={submitHarvest}>
           <div className={`harvest-image${photo ? " has-photo" : ""}`}>
@@ -2680,7 +2438,6 @@ function UserProfile({ user, onSaved }: { user: User | null; onSaved: (user: Use
     : "";
   return (
     <>
-      {!token && <p className="marketplace-error">You’re viewing Demo Mode. Sign in with a real account to see and update your personal details.</p>}
       <PageHeading
         eyebrow="YOUR ACCOUNT"
         title={user?.role === "buyer" ? "Your complete account profile." : "Your complete farmer profile."}
@@ -2738,96 +2495,11 @@ function UserProfile({ user, onSaved }: { user: User | null; onSaved: (user: Use
     </>
   );
 }
-function Analytics({ demo }: { demo: boolean }) {
-  if (!demo) return <><PageHeading eyebrow="ANALYTICS" title="Your analytics will grow with your data." text="Record a farm and harvest to calculate account-specific realization, profit and resource efficiency." /><div className="panel empty-state">No analytics are available yet for this account.</div></>;
+function Analytics() {
   return (
     <>
-      <PageHeading
-        eyebrow="ANALYTICS"
-        title="See the value of each decision."
-        text="A transparent view of estimated costs, realization and resource efficiency. Nothing here is a guarantee."
-      />
-      <div className="analytics-stats">
-        <Stat
-          label="Expected revenue"
-          value="INR 84,600"
-          note="per acre"
-          change="Estimated"
-        />
-        <Stat
-          label="Expected profit"
-          value="INR 18,500"
-          note="per acre"
-          change="+12.4%"
-        />
-        <Stat
-          label="Net realization"
-          value="INR 19.10"
-          note="per kg"
-          change="Best option"
-        />
-        <Stat
-          label="Sustainability score"
-          value="82 / 100"
-          note="resource index"
-          change="On track"
-        />
-      </div>
-      <div className="analytics-grid">
-        <div className="panel chart-panel">
-          <div className="panel-head">
-            <div>
-              <p className="eyebrow">COST VS REVENUE</p>
-              <h3>Estimated economics</h3>
-            </div>
-            <span className="data-tag">SIMULATED</span>
-          </div>
-          <div className="bar-chart">
-            <div className="axis">
-              <span>100k</span>
-              <span>75k</span>
-              <span>50k</span>
-              <span>25k</span>
-              <span>0</span>
-            </div>
-            <div className="bars">
-              {["Inputs", "Transport", "Market", "Revenue"].map((item, i) => (
-                <div className="bar-set" key={item}>
-                  <div
-                    className={`bar bar-${i}`}
-                    style={{ height: `${[30, 14, 22, 90][i]}%` }}
-                  />
-                  <small>{item}</small>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="chart-legend">
-            <span>
-              <i className="legend-cost" /> Estimated cost
-            </span>
-            <span>
-              <i className="legend-revenue" /> Expected revenue
-            </span>
-          </div>
-        </div>
-        <div className="panel efficiency-panel">
-          <div className="panel-head">
-            <div>
-              <p className="eyebrow">RESOURCE EFFICIENCY</p>
-              <h3>A lighter plan</h3>
-            </div>
-          </div>
-          <ScoreBar label="Water efficiency" value={74} />
-          <ScoreBar label="Input efficiency" value={81} />
-          <ScoreBar label="Transport efficiency" value={68} />
-          <ScoreBar label="Market optionality" value={86} />
-          <div className="efficiency-note">
-            Your recommended path favors a crop with low water demand and a
-            nearby market with active buyers.
-          </div>
-        </div>
-      </div>
+      <PageHeading eyebrow="ANALYTICS" title="Your analytics will grow with your data." text="Record a farm and harvest to calculate account-specific realization, profit and resource efficiency." />
+      <div className="panel empty-state">No analytics are available yet for this account.</div>
     </>
   );
 }
@@ -3028,158 +2700,4 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
     </div>
   );
 }
-function BuyerRow({
-  buyer,
-  onEnquiry,
-}: {
-  buyer: (typeof buyers)[number];
-  onEnquiry: () => void;
-}) {
-  return (
-    <div className="buyer-row">
-      <div className="buyer-initials">{buyer.initials}</div>
-      <div className="buyer-row-info">
-        <div>
-          <strong>{buyer.name}</strong>
-          <span>✓ Verified fields</span>
-        </div>
-        <small>
-          {buyer.location} · {buyer.quantity}
-        </small>
-      </div>
-      <div className="match-score">
-        <strong>{buyer.match}%</strong>
-        <small>match</small>
-      </div>
-      <button onClick={onEnquiry}>Enquire</button>
-    </div>
-  );
-}
-function BuyerLarge({
-  buyer,
-  onEnquiry,
-  sent,
-}: {
-  buyer: (typeof buyers)[number];
-  onEnquiry: () => void;
-  sent: boolean;
-}) {
-  return (
-    <div className="buyer-large panel">
-      <div className="buyer-big-avatar">{buyer.initials}</div>
-      <div className="buyer-large-info">
-        <div className="buyer-name-line">
-          <h3>{buyer.name}</h3>
-          <span className="verified-pill">✓ Verified fields</span>
-        </div>
-        <p>
-          {buyer.type} · {buyer.location}
-        </p>
-        <div className="buyer-facts">
-          <span>
-            <small>INTERESTED IN</small>
-            <b>Groundnut, Tomato</b>
-          </span>
-          <span>
-            <small>REQUIRED QUANTITY</small>
-            <b>{buyer.quantity}</b>
-          </span>
-          <span>
-            <small>EXPECTED OFFER</small>
-            <b>{buyer.offer}</b>
-          </span>
-          <span>
-            <small>VERIFIED DATA</small>
-            <b>{buyer.verification}</b>
-          </span>
-        </div>
-      </div>
-      <div className="buyer-match-ring">
-        <strong>{buyer.match}%</strong>
-        <span>AI match</span>
-      </div>
-      <div className="buyer-actions">
-        <button className="primary-button" onClick={onEnquiry}>
-          {sent ? "Enquiry sent ✓" : "Contact buyer"}
-        </button>
-        <button className="outline-button" onClick={onEnquiry}>
-          View profile
-        </button>
-      </div>
-    </div>
-  );
-}
-function EnquiryModal({
-  quantity,
-  setQuantity,
-  sent,
-  onClose,
-  onSend,
-}: {
-  quantity: string;
-  setQuantity: (value: string) => void;
-  sent: boolean;
-  onClose: () => void;
-  onSend: () => void;
-}) {
-  return (
-    <div className="modal-backdrop">
-      <div className="enquiry-modal">
-        <button className="modal-close" onClick={onClose}>
-          ×
-        </button>
-        <span className="modal-kicker">NEW ENQUIRY</span>
-        <h2>Connect with Rajesh Traders.</h2>
-        <p>Send a clear request so the buyer can respond faster.</p>
-        <div className="enquiry-buyer">
-          <div className="buyer-initials">RT</div>
-          <div>
-            <strong>Rajesh Traders</strong>
-            <small>Wholesaler · Guntur APMC · 94% match</small>
-          </div>
-        </div>
-        <div className="two-fields">
-          <label>
-            CROP
-            <input value="Groundnut" readOnly />
-          </label>
-          <label>
-            QUANTITY
-            <input
-              value={`${quantity} tonnes`}
-              onChange={(e) =>
-                setQuantity(e.target.value.replace(/[^0-9.]/g, ""))
-              }
-            />
-          </label>
-        </div>
-        <div className="two-fields">
-          <label>
-            GRADE
-            <select>
-              <option>Grade A</option>
-              <option>Grade B</option>
-            </select>
-          </label>
-          <label>
-            EXPECTED PRICE
-            <input value="INR 18 / kg" readOnly />
-          </label>
-        </div>
-        <label>
-          MESSAGE
-          <textarea defaultValue="I have 2 tonnes of Grade A groundnut available for sale." />
-        </label>
-        <button className="auth-submit" onClick={onSend}>
-          {sent ? "Enquiry sent ✓" : "Send enquiry"} <span>→</span>
-        </button>
-        <small className="modal-disclaimer">
-          Verified fields are shown exactly as provided by the buyer. FarmWise
-          does not guarantee transactions.
-        </small>
-      </div>
-    </div>
-  );
-}
-
 export default App;

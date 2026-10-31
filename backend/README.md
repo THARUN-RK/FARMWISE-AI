@@ -6,7 +6,7 @@ All seeded values are explicitly `DEMO DATA`; they are not live market quotes or
 
 ## Architecture
 
-FastAPI routes are backed by SQLAlchemy 2.x models and focused service engines in `app/services/engines.py`. PostgreSQL is the Docker target; SQLite is the default local fallback for quick tests. JWT bearer auth supports farmer, buyer, and admin roles. Crop, market, and buyer decisions are deterministic and explainable.
+FastAPI routes are backed by SQLAlchemy 2.x models and focused service engines in `app/services/engines.py`. PostgreSQL is the Docker target; SQLite is the default local fallback for quick tests. JWT bearer auth supports farmer, buyer, and admin roles. Access tokens are short-lived; HTTP-only refresh cookies rotate and can be revoked. Crop, market, and buyer decisions are deterministic and explainable.
 
 ## Run locally
 
@@ -14,6 +14,7 @@ FastAPI routes are backed by SQLAlchemy 2.x models and focused service engines i
 cd backend
 ..\.venv\Scripts\python.exe -m pip install -r requirements.txt
 $env:DATABASE_URL = "sqlite:///./farmwise.db" # omit when using .env/Postgres
+..\.venv\Scripts\python.exe -m alembic upgrade head
 ..\.venv\Scripts\python.exe scripts/seed_database.py
 ..\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000
 ```
@@ -40,9 +41,14 @@ bytes. Generate a unique secret (for example, with Python's
 reuse the example value or commit a real secret. Local development defaults to
 `APP_ENV=development`; production hosts must set the environment explicitly.
 
+Registration, login, Google login, token refresh, and harvest/media writes are
+rate limited with SlowAPI. Configure `REDIS_URL` to share rate-limit counters
+between backend instances; without Redis, the backend uses and logs a
+per-process memory fallback.
+
 ## Main endpoints
 
-- `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `GET /api/v1/auth/me`
+- `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `POST /api/v1/auth/refresh`, `POST /api/v1/auth/logout`, `GET /api/v1/auth/me`
 - `POST|GET|PUT /api/v1/farmers/profile`
 - `PUT /api/v1/farmers/profile` can change an authenticated account between `farmer` and `buyer`; self-service changes cannot grant the `admin` role.
 - `POST /api/v1/farms`, `GET /api/v1/farms`, `PUT /api/v1/farms/{id}`
@@ -100,7 +106,7 @@ Invoke-RestMethod http://localhost:8000/api/v1/farms -Headers $headers
 
 ## Migrations, tests, and ML roadmap
 
-The SQLAlchemy metadata can be used to initialize Alembic. For a production migration workflow, configure `alembic/env.py` with `Base.metadata` and run `alembic revision --autogenerate` then `alembic upgrade head`. The current MVP uses a transparent moving/rules baseline; future training can add `app/ml` and persist a versioned model after evaluating sufficient historical data.
+The application schema is managed by Alembic. New databases must run `alembic upgrade head` before seeding or starting the API. Create follow-up migrations with `alembic revision --autogenerate -m "describe schema change"`, review the generated migration, then run `alembic upgrade head`. The initial baseline preserves tables from the previous `create_all()` installation and adds missing farmer location fields. The current MVP uses a transparent moving/rules baseline; future training can add `app/ml` and persist a versioned model after evaluating sufficient historical data.
 
 Run tests with:
 

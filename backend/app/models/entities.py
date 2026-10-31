@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, Float, ForeignKey, Index, Integer, JSON, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
@@ -150,6 +150,198 @@ class ConversationMessage(Base):
     sender_id: Mapped[int] = mapped_column(ForeignKey("farmers.id"), index=True)
     body: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class ChatConversation(Base):
+    """A farmer's private FarmWise AI assistant thread."""
+    __tablename__ = "chat_conversations"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    farmer_id: Mapped[int] = mapped_column(ForeignKey("farmers.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    language: Mapped[str] = mapped_column(String(10), default="en")
+    include_farm_context: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    messages: Mapped[list["ChatMessage"]] = relationship(
+        back_populates="conversation",
+        cascade="all, delete-orphan",
+        order_by="ChatMessage.id",
+    )
+
+class ChatMessage(Base):
+    """A user turn or provider-generated assistant turn, with source metadata."""
+    __tablename__ = "chat_messages"
+    __table_args__ = (
+        CheckConstraint("role IN ('user', 'assistant')", name="ck_chat_messages_role"),
+        Index("ix_chat_messages_conversation_created", "conversation_id", "created_at", "id"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    conversation_id: Mapped[int] = mapped_column(ForeignKey("chat_conversations.id", ondelete="CASCADE"), index=True)
+    role: Mapped[str] = mapped_column(String(16))
+    content: Mapped[str] = mapped_column(Text)
+    language: Mapped[str] = mapped_column(String(10), default="en")
+    source_references: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
+    model_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    conversation: Mapped[ChatConversation] = relationship(back_populates="messages")
+
+class RefreshToken(Base):
+    """Hashed rotating refresh token record; raw tokens never enter the database."""
+    __tablename__ = "refresh_tokens"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    farmer_id: Mapped[int] = mapped_column(ForeignKey("farmers.id", ondelete="CASCADE"), index=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    family_id: Mapped[str] = mapped_column(String(36), index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    replaced_by_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+class AuditLog(Base):
+    """Security and sensitive-action audit metadata; never stores request bodies."""
+    __tablename__ = "audit_logs"
+    __table_args__ = (Index("ix_audit_logs_created_action", "created_at", "action"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    actor_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("farmers.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    action: Mapped[str] = mapped_column(String(100))
+    resource_type: Mapped[str] = mapped_column(String(80))
+    resource_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    outcome: Mapped[str] = mapped_column(String(20), default="success")
+    details: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+class SoilTest(Base):
+    __tablename__ = "soil_tests"
+    __table_args__ = (
+        CheckConstraint("ph IS NULL OR (ph >= 0 AND ph <= 14)", name="ck_soil_tests_ph_range"),
+        CheckConstraint("nitrogen_ppm IS NULL OR nitrogen_ppm >= 0", name="ck_soil_tests_n_nonnegative"),
+        CheckConstraint("phosphorus_ppm IS NULL OR phosphorus_ppm >= 0", name="ck_soil_tests_p_nonnegative"),
+        CheckConstraint("potassium_ppm IS NULL OR potassium_ppm >= 0", name="ck_soil_tests_k_nonnegative"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    farmer_id: Mapped[int] = mapped_column(ForeignKey("farmers.id", ondelete="CASCADE"), index=True)
+    ph: Mapped[float | None] = mapped_column(Float, nullable=True)
+    nitrogen_ppm: Mapped[float | None] = mapped_column(Float, nullable=True)
+    phosphorus_ppm: Mapped[float | None] = mapped_column(Float, nullable=True)
+    potassium_ppm: Mapped[float | None] = mapped_column(Float, nullable=True)
+    lab_name: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    sampled_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class FertilizerRecommendation(Base):
+    __tablename__ = "fertilizer_recommendations"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    farmer_id: Mapped[int] = mapped_column(ForeignKey("farmers.id", ondelete="CASCADE"), index=True)
+    soil_test_id: Mapped[int | None] = mapped_column(ForeignKey("soil_tests.id", ondelete="SET NULL"), nullable=True, index=True)
+    crop_id: Mapped[int | None] = mapped_column(ForeignKey("crops.id", ondelete="SET NULL"), nullable=True, index=True)
+    crop_name: Mapped[str] = mapped_column(String(80))
+    growth_stage: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    recommendations: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    explanation: Mapped[str] = mapped_column(Text)
+    source_references: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    is_estimate: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+class DiseaseDetection(Base):
+    __tablename__ = "disease_detections"
+    __table_args__ = (
+        CheckConstraint("confidence IS NULL OR (confidence >= 0 AND confidence <= 1)", name="ck_disease_detection_confidence_range"),
+        CheckConstraint("status IN ('uploaded', 'processing', 'completed', 'escalated', 'failed')", name="ck_disease_detection_status"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    farmer_id: Mapped[int] = mapped_column(ForeignKey("farmers.id", ondelete="CASCADE"), index=True)
+    storage_key: Mapped[str] = mapped_column(String(512))
+    status: Mapped[str] = mapped_column(String(20), default="uploaded", index=True)
+    predictions: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    requires_expert_review: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    model_version: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+class DetectionFeedback(Base):
+    __tablename__ = "detection_feedback"
+    __table_args__ = (UniqueConstraint("detection_id", "farmer_id", name="uq_detection_feedback_farmer"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    detection_id: Mapped[int] = mapped_column(ForeignKey("disease_detections.id", ondelete="CASCADE"), index=True)
+    farmer_id: Mapped[int] = mapped_column(ForeignKey("farmers.id", ondelete="CASCADE"), index=True)
+    is_correct: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    corrected_condition: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    feedback_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class Notification(Base):
+    __tablename__ = "notifications"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    farmer_id: Mapped[int] = mapped_column(ForeignKey("farmers.id", ondelete="CASCADE"), index=True)
+    notification_type: Mapped[str] = mapped_column(String(60), index=True)
+    title: Mapped[str] = mapped_column(String(200))
+    body: Mapped[str] = mapped_column(Text)
+    payload: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+class Plan(Base):
+    __tablename__ = "plans"
+    __table_args__ = (CheckConstraint("price_paise >= 0", name="ck_plans_price_nonnegative"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    plan_key: Mapped[str] = mapped_column(String(40), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(120))
+    price_paise: Mapped[int] = mapped_column(Integer, default=0)
+    currency: Mapped[str] = mapped_column(String(3), default="INR")
+    billing_interval: Mapped[str] = mapped_column(String(20), default="month")
+    scan_limit: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+    __table_args__ = (
+        CheckConstraint("status IN ('pending', 'active', 'past_due', 'cancelled', 'expired')", name="ck_subscriptions_status"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    farmer_id: Mapped[int] = mapped_column(ForeignKey("farmers.id", ondelete="CASCADE"), index=True)
+    plan_id: Mapped[int] = mapped_column(ForeignKey("plans.id"), index=True)
+    status: Mapped[str] = mapped_column(String(20), default="pending", index=True)
+    provider: Mapped[str] = mapped_column(String(40), default="razorpay")
+    provider_subscription_id: Mapped[str | None] = mapped_column(String(160), unique=True, nullable=True)
+    current_period_start: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    current_period_end: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Payment(Base):
+    __tablename__ = "payments"
+    __table_args__ = (
+        CheckConstraint("amount_paise >= 0", name="ck_payments_amount_nonnegative"),
+        CheckConstraint("status IN ('pending', 'captured', 'failed', 'refunded')", name="ck_payments_status"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    farmer_id: Mapped[int] = mapped_column(ForeignKey("farmers.id", ondelete="CASCADE"), index=True)
+    subscription_id: Mapped[int | None] = mapped_column(ForeignKey("subscriptions.id", ondelete="SET NULL"), nullable=True, index=True)
+    provider: Mapped[str] = mapped_column(String(40), default="razorpay")
+    provider_order_id: Mapped[str] = mapped_column(String(160), unique=True)
+    provider_payment_id: Mapped[str | None] = mapped_column(String(160), unique=True, nullable=True)
+    amount_paise: Mapped[int] = mapped_column(Integer)
+    currency: Mapped[str] = mapped_column(String(3), default="INR")
+    status: Mapped[str] = mapped_column(String(20), default="pending", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class ExpertReview(Base):
+    __tablename__ = "expert_reviews"
+    __table_args__ = (
+        CheckConstraint("disease_detection_id IS NOT NULL OR recommendation_id IS NOT NULL", name="ck_expert_review_target"),
+        CheckConstraint("status IN ('pending', 'in_review', 'completed')", name="ck_expert_review_status"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    farmer_id: Mapped[int] = mapped_column(ForeignKey("farmers.id", ondelete="CASCADE"), index=True)
+    expert_user_id: Mapped[int | None] = mapped_column(ForeignKey("farmers.id", ondelete="SET NULL"), nullable=True, index=True)
+    disease_detection_id: Mapped[int | None] = mapped_column(ForeignKey("disease_detections.id", ondelete="CASCADE"), nullable=True, index=True)
+    recommendation_id: Mapped[int | None] = mapped_column(ForeignKey("recommendations.id", ondelete="CASCADE"), nullable=True, index=True)
+    status: Mapped[str] = mapped_column(String(20), default="pending", index=True)
+    advice: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 class Recommendation(Base):
     __tablename__ = "recommendations"

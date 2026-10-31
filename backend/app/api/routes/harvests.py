@@ -7,12 +7,13 @@ enabling market ranking and buyer matching flows.
 import logging
 from datetime import date
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.deps import current_user, farmer_only
 from app.core.database import get_db
+from app.core.limiter import limiter
 from app.models.entities import Crop, CropListing, Harvest
 from app.schemas.common import HarvestCreate
 
@@ -25,7 +26,9 @@ def _response(data, message: str = ""):
 
 
 @router.post("", status_code=201)
+@limiter.limit("10/minute")
 def create_harvest(
+    request: Request,
     body: HarvestCreate,
     user=Depends(farmer_only),
     db: Session = Depends(get_db),

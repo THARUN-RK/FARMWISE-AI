@@ -4,13 +4,15 @@ Shared FastAPI dependency injectors.
 These replace the inline `current_user` and `farmer_only` functions
 that were previously defined in main.py. Import from here in every router.
 """
+from datetime import datetime
+
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.security import decode_token
-from app.models.entities import Farmer
+from app.models.entities import Farmer, RefreshToken
 
 oauth2 = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -20,6 +22,15 @@ def current_user(token: str = Depends(oauth2), db: Session = Depends(get_db)) ->
     try:
         payload = decode_token(token)
         user = db.get(Farmer, int(payload["sub"]))
+        session = db.get(RefreshToken, int(payload["sid"]))
+        if (
+            not user
+            or not session
+            or session.farmer_id != user.id
+            or session.revoked_at is not None
+            or session.expires_at <= datetime.utcnow()
+        ):
+            user = None
     except (ValueError, KeyError, TypeError):
         user = None
     if not user:

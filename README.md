@@ -45,6 +45,7 @@ Backend:
 ```powershell
 Push-Location backend
 ..\.venv\Scripts\python.exe -m pip install -r requirements.txt
+..\.venv\Scripts\python.exe -m alembic upgrade head
 ..\.venv\Scripts\python.exe scripts\seed_database.py
 ..\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000
 Pop-Location
@@ -86,9 +87,7 @@ account; it does not continuously track location in the background.
 
 ## Deployment
 
-The frontend deploys through `.github/workflows/deploy-pages.yml`. The backend requires a separate Python hosting target such as Azure Container Apps, Render, Railway, or a VPS with PostgreSQL.
-
-If the Pages settings are using branch deployment instead of Actions, set **Settings -> Pages -> Deploy from a branch -> `main` -> `/docs`**. The compiled frontend artifact is committed in `docs/`; do not select `/ (root)`, because the root `index.html` is the Vite development entry and will request `/src/main.tsx`.
+The frontend deploys through `.github/workflows/deploy-pages.yml`; set GitHub Pages to **GitHub Actions**. Production bundles are built by the workflow and are not committed. The backend requires a separate Python hosting target such as Azure Container Apps, Render, Railway, or a VPS with PostgreSQL.
 
 ### Deploy the backend on Render
 

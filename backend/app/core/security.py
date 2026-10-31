@@ -3,6 +3,18 @@ from jose import JWTError, jwt
 import bcrypt
 from .config import settings
 
+def create_access_token(subject: str, role: str, session_id: int | None = None) -> str:
+    expires = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)
+    return jwt.encode(
+        {"sub": subject, "role": role, "sid": session_id, "exp": expires},
+        settings.jwt_secret,
+        algorithm=settings.jwt_algorithm,
+    )
+
+def hash_refresh_token(token: str) -> str:
+    import hashlib
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
 def hash_password(password: str) -> str:
     encoded = password.encode("utf-8")
     if len(encoded) > 72:
@@ -12,10 +24,6 @@ def hash_password(password: str) -> str:
 def verify_password(password: str, hashed: str) -> bool:
     encoded = password.encode("utf-8")
     return len(encoded) <= 72 and bcrypt.checkpw(encoded, hashed.encode("utf-8"))
-
-def create_access_token(subject: str, role: str) -> str:
-    expires = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)
-    return jwt.encode({"sub": subject, "role": role, "exp": expires}, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 def decode_token(token: str) -> dict:
     try:

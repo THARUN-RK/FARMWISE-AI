@@ -461,7 +461,9 @@ function App() {
           </button>
           <button
             className="logout-button"
-            onClick={() => {
+            onClick={async () => {
+              const token = getToken();
+              if (token) await api.logout(token).catch(() => undefined);
               clearToken();
               setUser(null);
               setFarm(null);

@@ -150,3 +150,77 @@ def test_profile_saves_opt_in_location_coordinates():
     assert response.status_code == 200
     assert response.json()["data"]["latitude"] == 12.2958
     assert response.json()["data"]["longitude"] == 76.6394
+
+
+def test_refresh_cookie_rotates_and_replay_revokes_its_family():
+    phone = f"+9195{uuid4().int % 10**8:08d}"
+    registered = client.post(
+        "/api/v1/auth/register",
+        json={"name": "Refresh Test Farmer", "phone": phone, "password": "StrongPass123"},
+    )
+    assert registered.status_code == 201
+    old_access = registered.json()["data"]["access_token"]
+    old_refresh = registered.cookies.get("farmwise_refresh")
+    assert old_refresh
+    assert "httponly" in registered.headers["set-cookie"].lower()
+
+    refresh_headers = {"X-FarmWise-Refresh": "1"}
+    rotated = client.post(
+        "/api/v1/auth/refresh",
+        headers=refresh_headers,
+        cookies={"farmwise_refresh": old_refresh},
+    )
+    assert rotated.status_code == 200
+    new_access = rotated.json()["data"]["access_token"]
+    new_refresh = rotated.cookies.get("farmwise_refresh")
+    assert new_refresh and new_refresh != old_refresh
+    assert client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {old_access}"}).status_code == 401
+    assert client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {new_access}"}).status_code == 200
+
+    replay = client.post(
+        "/api/v1/auth/refresh",
+        headers=refresh_headers,
+        cookies={"farmwise_refresh": old_refresh},
+    )
+    assert replay.status_code == 401
+    assert client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {new_access}"}).status_code == 401
+
+
+def test_logout_revokes_access_session_and_admin_self_registration_is_rejected():
+    registration = client.post(
+        "/api/v1/auth/register",
+        json={
+            "name": "Logout Test Farmer",
+            "phone": f"+9196{uuid4().int % 10**8:08d}",
+            "password": "StrongPass123",
+        },
+    )
+    access = registration.json()["data"]["access_token"]
+    logout = client.post("/api/v1/auth/logout", headers={"Authorization": f"Bearer {access}"})
+    assert logout.status_code == 200
+    assert client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {access}"}).status_code == 401
+
+    admin_signup = client.post(
+        "/api/v1/auth/register",
+        json={
+            "name": "Self Assigned Admin",
+            "phone": f"+9197{uuid4().int % 10**8:08d}",
+            "password": "StrongPass123",
+            "role": "admin",
+        },
+    )
+    assert admin_signup.status_code == 422
+
+
+def test_authentication_rate_limit_returns_429():
+    for _ in range(10):
+        response = client.post(
+            "/api/v1/auth/login",
+            json={"phone": "+919999999998", "password": "WrongPassword123"},
+        )
+        assert response.status_code == 401
+    limited = client.post(
+        "/api/v1/auth/login",
+        json={"phone": "+919999999998", "password": "WrongPassword123"},
+    )
+    assert limited.status_code == 429

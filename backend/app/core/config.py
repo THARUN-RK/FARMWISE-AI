@@ -11,8 +11,10 @@ class Settings(BaseSettings):
     jwt_secret: str = "dev-only-change-me"
     google_client_id: str = "263684588844-r1cllo3a62gfisbstsqevnmgnvu1j3pd.apps.googleusercontent.com"
     google_translate_api_key: str = ""
+    redis_url: str = ""
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
+    refresh_token_expire_days: int = 30
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173,https://tharun-rk.github.io"
     demo_data: bool = True
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", case_sensitive=False)

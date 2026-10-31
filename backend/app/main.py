@@ -7,7 +7,7 @@ This file is responsible for:
 - Creating the FastAPI app
 - Registering middleware (CORS, exception handlers)
 - Including all routers
-- Initialising the database schema on startup
+- Registering route-level rate limiting
 """
 
 import logging
@@ -15,6 +15,9 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from app.api.routes import (
     auth,
@@ -28,7 +31,7 @@ from app.api.routes import (
     weather,
 )
 from app.core.config import settings
-from app.core.database import Base, engine, ensure_local_schema
+from app.core.limiter import limiter
 
 
 logging.basicConfig(
@@ -41,10 +44,6 @@ log = logging.getLogger("farmwise")
 
 # ── Database initialisation ───────────────────────────────────────────────────
 
-Base.metadata.create_all(bind=engine)
-ensure_local_schema()
-
-
 # ── Application ───────────────────────────────────────────────────────────────
 
 app = FastAPI(
@@ -55,6 +54,9 @@ app = FastAPI(
         "All AI scores are estimates and decision-support tools, not guarantees."
     ),
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 
 # ── CORS ──────────────────────────────────────────────────────────────────────

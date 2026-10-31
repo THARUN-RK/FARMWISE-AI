@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from sqlalchemy import select
-from app.core.database import Base, SessionLocal, engine
+from app.core.database import SessionLocal
 from app.core.security import hash_password
 from app.models.entities import Buyer, BuyerRequirement, Crop, Farm, Farmer, Market, MarketPrice
 
@@ -11,7 +11,7 @@ CROPS = [("Groundnut", "Arachis hypogaea", 110, "Low", 17000, 950, "Low"), ("Chi
 MARKET_NAMES = ["Market A", "Market B", "Market C", "Guntur Central", "Mangalagiri APMC", "Vijayawada Wholesale", "Kurnool Yard", "Anantapur Market", "Mysuru APMC", "Hubballi Market"]
 
 def seed():
-    Base.metadata.create_all(bind=engine); db = SessionLocal()
+    db = SessionLocal()
     try:
         if db.scalar(select(Crop).limit(1)): print("Seed already present; no duplicates created."); return
         crops = []

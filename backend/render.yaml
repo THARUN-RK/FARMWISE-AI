@@ -4,7 +4,7 @@ services:
     runtime: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
       - key: APP_ENV
@@ -24,11 +24,17 @@ services:
       - key: GOOGLE_TRANSLATE_API_KEY
         sync: false
 
+      - key: REDIS_URL
+        sync: false
+
       - key: JWT_ALGORITHM
         value: HS256
 
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: "60"
+
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        value: "30"
 
       - key: CORS_ORIGINS
         value: https://tharun-rk.github.io

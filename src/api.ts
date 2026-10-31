@@ -9,6 +9,33 @@ function assertApiConfigured() {
   }
 }
 
+let refreshInFlight: Promise<string | null> | null = null;
+
+async function refreshAccessToken(): Promise<string | null> {
+  if (!refreshInFlight) {
+    refreshInFlight = fetch(`${API_BASE}/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json", "X-FarmWise-Refresh": "1" },
+    })
+      .then(async (response) => {
+        const body = await response.json().catch(() => ({}));
+        const nextToken = response.ok ? body?.data?.access_token : null;
+        if (typeof nextToken === "string") {
+          saveToken(nextToken);
+          return nextToken;
+        }
+        if (response.status === 401) clearToken();
+        return null;
+      })
+      .catch(() => null)
+      .finally(() => {
+        refreshInFlight = null;
+      });
+  }
+  return refreshInFlight;
+}
+
 export type User = {
   id: number;
   name: string;
@@ -163,14 +190,20 @@ async function request<T>(
   assertApiConfigured();
   let response: Response;
   try {
-    response = await fetch(`${API_BASE}${path}`, {
+    const sendRequest = (accessToken?: string) => fetch(`${API_BASE}${path}`, {
       ...options,
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         ...(options.headers ?? {}),
       },
     });
+    response = await sendRequest(token);
+    if (response.status === 401 && token && path !== "/auth/refresh") {
+      const refreshed = await refreshAccessToken();
+      if (refreshed) response = await sendRequest(refreshed);
+    }
   } catch {
     throw new Error("FarmWise API is not reachable. Start the backend locally or configure VITE_API_URL for the deployed app.");
   }
@@ -230,6 +263,7 @@ export const api = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+  logout: (token: string) => request<null>("/auth/logout", { method: "POST" }, token),
   me: (token: string) => request<User>("/auth/me", {}, token),
   updateProfile: (payload: { name: string; role?: "farmer" | "buyer"; language: string; location_name?: string | null; state?: string | null; district?: string | null; latitude?: number | null; longitude?: number | null }, token: string) => request<User>("/farmers/profile", { method: "PUT", body: JSON.stringify(payload) }, token),
   farms: (token: string) => request<Farm[]>("/farms", {}, token),

@@ -20,6 +20,33 @@ class Farmer(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     farms: Mapped[list["Farm"]] = relationship(back_populates="farmer", cascade="all, delete-orphan")
+    farm_profile: Mapped["FarmProfile | None"] = relationship(
+        back_populates="farmer",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
+class FarmProfile(Base):
+    __tablename__ = "farm_profiles"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("farmers.id", ondelete="CASCADE"), unique=True)
+    state: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    district: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    taluk: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    village: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    land_area_acres: Mapped[float | None] = mapped_column(Float, nullable=True)
+    soil_type: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    water_availability: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    irrigation_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    current_season: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    budget: Mapped[float | None] = mapped_column(Float, nullable=True)
+    previous_crop: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    preferred_crop_category: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    farmer: Mapped[Farmer] = relationship(back_populates="farm_profile")
 
 class Farm(Base):
     __tablename__ = "farms"
@@ -39,16 +66,49 @@ class Crop(Base):
     __tablename__ = "crops"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(80), unique=True, index=True)
+    crop_category: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
     scientific_name: Mapped[str | None] = mapped_column(String(120))
+
+    def __init__(self, **kwargs):
+        if "crop_name" in kwargs and "name" not in kwargs:
+            kwargs["name"] = kwargs.pop("crop_name")
+        super().__init__(**kwargs)
     duration_days: Mapped[int] = mapped_column(Integer)
     water_requirement: Mapped[str] = mapped_column(String(30))
     soil_types: Mapped[str] = mapped_column(String(255))
     suitable_seasons: Mapped[str] = mapped_column(String(255))
     climate_requirement: Mapped[str] = mapped_column(String(255))
-    base_production_cost_per_acre: Mapped[float] = mapped_column(Float)
-    expected_yield_per_acre: Mapped[float] = mapped_column(Float)
-    risk_level: Mapped[str] = mapped_column(String(20))
+    suitable_regions: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    minimum_land_area: Mapped[float | None] = mapped_column(Float, nullable=True)
+    seed_requirement_per_acre: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    fertilizer_guidelines: Mapped[str | None] = mapped_column(Text, nullable=True)
+    estimated_cost_per_acre: Mapped[float | None] = mapped_column(Float, nullable=True)
+    expected_yield_min: Mapped[float | None] = mapped_column(Float, nullable=True)
+    expected_yield_max: Mapped[float | None] = mapped_column(Float, nullable=True)
+    temperature_range: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    rainfall_requirement: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    base_production_cost_per_acre: Mapped[float] = mapped_column(Float, default=0)
+    expected_yield_per_acre: Mapped[float] = mapped_column(Float, default=0)
+    risk_level: Mapped[str] = mapped_column(String(20), default="medium")
     description: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    @property
+    def crop_name(self) -> str:
+        return self.name
+
+    @property
+    def suitable_soil_types(self) -> str:
+        return self.soil_types or ""
+
+    @property
+    def cultivation_duration_days(self) -> int:
+        return self.duration_days or 0
+
+    @property
+    def suitable_regions_display(self) -> str:
+        return self.suitable_regions or ""
 
 class CropRequirement(Base):
     __tablename__ = "crop_requirements"
@@ -355,6 +415,35 @@ class Recommendation(Base):
     reason_codes: Mapped[str] = mapped_column(Text, default="")
     model_version: Mapped[str] = mapped_column(String(40), default="rules-v1")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class CropRecommendation(Base):
+    __tablename__ = "crop_recommendations"
+    __table_args__ = (Index("ix_crop_recommendations_user_generated", "user_id", "generated_at"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("farmers.id", ondelete="CASCADE"))
+    farm_profile_id: Mapped[int | None] = mapped_column(ForeignKey("farm_profiles.id", ondelete="SET NULL"), nullable=True)
+    crop_id: Mapped[int | None] = mapped_column(ForeignKey("crops.id", ondelete="SET NULL"), nullable=True)
+    crop_name: Mapped[str] = mapped_column(String(80), index=True)
+    suitability_score: Mapped[float] = mapped_column(Float, default=0)
+    suitability_category: Mapped[str] = mapped_column(String(20), default="Low")
+    cultivation_duration_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    water_requirement: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    estimated_cost_per_acre: Mapped[float | None] = mapped_column(Float, nullable=True)
+    expected_yield: Mapped[float | None] = mapped_column(Float, nullable=True)
+    reasons: Mapped[str | None] = mapped_column(Text, nullable=True)
+    risks: Mapped[str | None] = mapped_column(Text, nullable=True)
+    data_sources: Mapped[str | None] = mapped_column(Text, nullable=True)
+    generated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+class SavedCropRecommendation(Base):
+    __tablename__ = "saved_crop_recommendations"
+    __table_args__ = (UniqueConstraint("user_id", "recommendation_id", name="uq_saved_crop_recommendation_user"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("farmers.id", ondelete="CASCADE"))
+    recommendation_id: Mapped[int] = mapped_column(ForeignKey("crop_recommendations.id", ondelete="CASCADE"))
+    saved_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 class Enquiry(Base):
     __tablename__ = "enquiries"

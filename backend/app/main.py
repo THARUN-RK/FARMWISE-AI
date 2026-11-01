@@ -30,6 +30,7 @@ from app.api.routes import (
     translate,
     weather,
 )
+from app.api.v1 import crop_planner, farm
 from app.core.config import settings
 from app.core.limiter import limiter
 
@@ -159,6 +160,10 @@ app.include_router(
     translate.router,
     prefix=PREFIX,
 )
+
+# Versioned crop planner APIs
+app.include_router(farm.router, prefix=PREFIX)
+app.include_router(crop_planner.router, prefix=PREFIX)
 
 
 # ── Backward-compatible farmer profile routes ─────────────────────────────────

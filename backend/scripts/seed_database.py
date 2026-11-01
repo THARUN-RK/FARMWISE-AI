@@ -7,7 +7,23 @@ from app.core.database import SessionLocal
 from app.core.security import hash_password
 from app.models.entities import Buyer, BuyerRequirement, Crop, Farm, Farmer, Market, MarketPrice
 
-CROPS = [("Groundnut", "Arachis hypogaea", 110, "Low", 17000, 950, "Low"), ("Chilli", "Capsicum annuum", 120, "Medium", 24000, 700, "Medium"), ("Tomato", "Solanum lycopersicum", 95, "Medium", 30000, 2800, "Low"), ("Onion", "Allium cepa", 110, "Medium", 26000, 2500, "Medium"), ("Maize", "Zea mays", 100, "Medium", 18000, 2200, "Low"), ("Paddy", "Oryza sativa", 125, "High", 28000, 2600, "Medium"), ("Cotton", "Gossypium", 170, "Medium", 32000, 700, "Medium"), ("Potato", "Solanum tuberosum", 100, "Medium", 35000, 5000, "Medium"), ("Turmeric", "Curcuma longa", 210, "High", 45000, 2800, "Medium"), ("Sugarcane", "Saccharum officinarum", 300, "High", 65000, 32000, "Low")]
+CROPS = [
+    ("Ragi", "Eleusine coracana", "Millets", 100, "Low to medium", "Kharif,Rabi", "Red loam, loamy", "Karnataka, Tamil Nadu, Andhra Pradesh", 9000, 1800, 2200, "20-30C", "500-700 mm", "Sorghum and millets"),
+    ("Paddy", "Oryza sativa", "Cereals", 120, "High", "Kharif", "Clay loam, alluvial", "Karnataka, Andhra Pradesh, Telangana", 18000, 3000, 4200, "24-32C", "1000-1500 mm", "Rice and cereals"),
+    ("Maize", "Zea mays", "Cereals", 90, "Medium", "Kharif,Rabi", "Loamy, red loam", "Karnataka, Andhra Pradesh", 16000, 2700, 3500, "20-32C", "600-900 mm", "Combinable cereals"),
+    ("Groundnut", "Arachis hypogaea", "Oilseeds", 110, "Low to medium", "Kharif", "Sandy loam, red loam", "Karnataka, Tamil Nadu", 14000, 2500, 3200, "22-34C", "500-750 mm", "Groundnut and oilseeds"),
+    ("Red gram", "Cajanus cajan", "Pulses", 160, "Low", "Kharif", "Black soil, red loam", "Karnataka, Maharashtra", 11000, 1800, 2600, "20-32C", "500-800 mm", "Pulses and legumes"),
+    ("Green gram", "Vigna radiata", "Pulses", 70, "Low", "Kharif,Rabi", "Loamy, sandy loam", "Karnataka, Tamil Nadu", 8000, 1400, 2000, "25-35C", "400-600 mm", "Short-duration pulses"),
+    ("Black gram", "Vigna mungo", "Pulses", 80, "Low", "Kharif,Rabi", "Loamy, clay loam", "Karnataka, Andhra Pradesh", 9000, 1500, 2200, "24-33C", "500-700 mm", "Pulses and legumes"),
+    ("Sunflower", "Helianthus annuus", "Oilseeds", 90, "Medium", "Kharif", "Loamy, black soil", "Karnataka, Maharashtra", 12000, 2200, 3000, "20-30C", "500-700 mm", "Oilseed cereals"),
+    ("Tomato", "Solanum lycopersicum", "Vegetables", 95, "Medium", "Rabi,Kharif", "Loamy, red loam", "Karnataka, Tamil Nadu", 30000, 3500, 5200, "18-30C", "600-900 mm", "Vegetables and horticulture"),
+    ("Onion", "Allium cepa", "Vegetables", 100, "Medium", "Kharif,Rabi", "Loamy, sandy loam", "Karnataka, Maharashtra", 26000, 2500, 4200, "15-30C", "500-800 mm", "Vegetables and bulb crops"),
+    ("Chilli", "Capsicum annuum", "Vegetables", 120, "Medium", "Kharif,Rabi", "Loamy, red loam", "Karnataka, Telangana", 24000, 2800, 4200, "20-32C", "600-900 mm", "Vegetable and spice crops"),
+    ("Potato", "Solanum tuberosum", "Vegetables", 100, "Medium", "Rabi", "Loamy, sandy loam", "Karnataka, Tamil Nadu", 35000, 4200, 5400, "15-25C", "500-750 mm", "Vegetable tubers"),
+    ("Coconut", "Cocos nucifera", "Perennials", 330, "Medium", "Year-round", "Sandy loam, laterite", "Karnataka, Kerala, Tamil Nadu", 45000, 3000, 6100, "24-32C", "1500-2000 mm", "Perennial plantation crop"),
+    ("Arecanut", "Areca catechu", "Perennials", 360, "High", "Year-round", "Loamy, laterite", "Karnataka, Kerala", 47000, 5000, 7600, "20-32C", "1800-2500 mm", "Perennial plantation crop"),
+    ("Sugarcane", "Saccharum officinarum", "Commercial", 300, "High", "Year-round", "Loamy, clay loam", "Karnataka, Maharashtra", 65000, 16000, 24500, "22-35C", "1000-1500 mm", "Commercial sugar crop"),
+]
 MARKET_NAMES = ["Market A", "Market B", "Market C", "Guntur Central", "Mangalagiri APMC", "Vijayawada Wholesale", "Kurnool Yard", "Anantapur Market", "Mysuru APMC", "Hubballi Market"]
 
 def seed():
@@ -15,8 +31,30 @@ def seed():
     try:
         if db.scalar(select(Crop).limit(1)): print("Seed already present; no duplicates created."); return
         crops = []
-        for name, scientific, duration, water, cost, yield_, risk in CROPS:
-            crop = Crop(name=name, scientific_name=scientific, duration_days=duration, water_requirement=water, soil_types="Loamy,Red loam,Black soil", suitable_seasons="Kharif,Rabi", climate_requirement="18-35C", base_production_cost_per_acre=cost, expected_yield_per_acre=yield_, risk_level=risk, description=f"DEMO DATA profile for {name}."); db.add(crop); crops.append(crop)
+        for name, scientific, category, duration, water, seasons, soil_types, regions, cost, yield_min, yield_max, temperature, rainfall, description in CROPS:
+            crop = Crop(
+                crop_name=name,
+                crop_category=category,
+                scientific_name=scientific,
+                duration_days=duration,
+                water_requirement=water,
+                soil_types=soil_types,
+                suitable_seasons=seasons,
+                climate_requirement=f"{temperature}; rainfall {rainfall}",
+                suitable_regions=regions,
+                minimum_land_area=0.5,
+                seed_requirement_per_acre="Use local seed rate as per agronomic recommendation",
+                fertilizer_guidelines="Use soil-test-guided nutrition plan; do not extrapolate from non-local sources",
+                estimated_cost_per_acre=float(cost),
+                expected_yield_min=float(yield_min),
+                expected_yield_max=float(yield_max),
+                temperature_range=temperature,
+                rainfall_requirement=rainfall,
+                base_production_cost_per_acre=float(cost),
+                expected_yield_per_acre=float(yield_max),
+                risk_level="medium",
+                description=f"Seeded crop profile for {name}. {description}",
+            ); db.add(crop); crops.append(crop)
         farmer = Farmer(name="Demo Farmer", phone="+919999999999", email="demo@farmwise.local", password_hash=hash_password("DemoPass123!"), location_name="Karnataka", latitude=15.3173, longitude=75.7139); db.add(farmer); db.flush(); db.add(Farm(farmer_id=farmer.id, land_size_acres=2, soil_type="Loamy", water_availability="Medium", current_season="Kharif", budget=50000, previous_crop="Maize"))
         markets = []
         for index, name in enumerate(MARKET_NAMES):

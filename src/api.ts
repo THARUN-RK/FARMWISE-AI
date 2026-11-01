@@ -179,7 +179,7 @@ export type AccountAlert = {
 };
 
 export type GoogleLoginResult =
-  | { requires_otp: true; email: string; name: string; phone_required?: boolean; message?: string }
+  | { phone_required: true; email: string; name: string }
   | { access_token: string; token_type: string; user: User };
 
 async function request<T>(
@@ -248,16 +248,6 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ credential, phone }),
     }),
-  googleOtpVerify: (email: string, otp: string) =>
-    request<{ access_token: string; user: User; token_type: string }>("/auth/google/otp/verify", {
-      method: "POST",
-      body: JSON.stringify({ email, otp }),
-    }),
-  googleOtpResend: (email: string) =>
-    request<{ email: string; message?: string }>("/auth/google/otp/resend", {
-      method: "POST",
-      body: JSON.stringify({ email }),
-    }),
   register: (payload: {
     name: string;
     phone: string;
@@ -318,20 +308,12 @@ export const api = {
     request<Record<string, string>>(`/translate/interface-strings/${language}`),
 };
 
-let inMemoryAccessToken: string | null = null;
-
 export function saveToken(token: string) {
-  inMemoryAccessToken = token;
+  localStorage.setItem("farmwise_access_token", token);
 }
 export function getToken() {
-  return inMemoryAccessToken;
+  return localStorage.getItem("farmwise_access_token");
 }
 export function clearToken() {
-  inMemoryAccessToken = null;
-}
-
-export async function restoreSession(): Promise<string | null> {
-  const refreshed = await refreshAccessToken();
-  if (refreshed) saveToken(refreshed);
-  return refreshed;
+  localStorage.removeItem("farmwise_access_token");
 }

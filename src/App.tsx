@@ -218,6 +218,7 @@ function App() {
   const [selectedCrop, setSelectedCrop] = useState(crops[0]),
     [water, setWater] = useState("Medium"),
     [soil, setSoil] = useState("Loamy");
+  const rankedMarkets = useMemo<(Market & { net: number })[]>(() => [], []);
   const changeLanguage = (nextLanguage: Language) => {
     setLanguage(nextLanguage);
     setTranslationUnavailable(false);
@@ -523,7 +524,7 @@ function App() {
               farm={farm}
               go={setActive}
               rankedCrops={rankedCrops}
-              rankedMarkets={[]}
+              rankedMarkets={rankedMarkets}
             />
           )}
           {active === "My Farm" && (

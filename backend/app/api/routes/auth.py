@@ -4,9 +4,12 @@ Authentication routes: register, login, me, profile CRUD.
 Logic is identical to the original main.py implementation — only
 the file location has changed to follow proper FastAPI router structure.
 """
+import hashlib
 import logging
 import secrets
+import smtplib
 from datetime import datetime, timedelta
+from email.message import EmailMessage
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -21,7 +24,7 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.limiter import limiter
 from app.core.security import create_access_token, hash_password, hash_refresh_token, verify_password
-from app.models.entities import Farmer, RefreshToken
+from app.models.entities import EmailOTP, Farmer, RefreshToken
 from app.services.audit import record_audit_event
 from app.schemas.common import (
     CurrentUser,
@@ -62,6 +65,59 @@ def _clear_refresh_cookie(response: Response) -> None:
         samesite="none" if secure else "lax",
         path="/api/v1/auth",
     )
+
+
+def _hash_otp(value: str) -> str:
+    return hashlib.sha256(value.strip().encode("utf-8")).hexdigest()
+
+
+def _send_otp_email(to_email: str, code: str) -> None:
+    if not settings.smtp_host or not settings.smtp_from_email:
+        log.warning("OTP email delivery is not configured; skipping send for %s", to_email)
+        return
+    message = EmailMessage()
+    message["Subject"] = "FarmWise AI: Your verification code"
+    message["From"] = settings.smtp_from_email
+    message["To"] = to_email
+    message.set_content(
+        f"Your FarmWise AI verification code is {code}. This code expires in 5 minutes and can only be used once."
+    )
+    try:
+        with smtplib.SMTP(settings.smtp_host, settings.smtp_port or 587, timeout=20) as server:
+            if settings.smtp_username and settings.smtp_password:
+                server.starttls()
+                server.login(settings.smtp_username, settings.smtp_password)
+            server.send_message(message)
+    except (smtplib.SMTPException, OSError) as exc:
+        log.exception("Failed to send OTP email to %s", to_email)
+        raise HTTPException(503, "Unable to send the OTP email right now. Please try again.") from exc
+
+
+def _create_otp_record(db: Session, user: Farmer, purpose: str = "google_login") -> str:
+    code = f"{secrets.randbelow(1_000_000):06d}"
+    otp_record = EmailOTP(
+        farmer_id=user.id,
+        purpose=purpose,
+        code_hash=_hash_otp(code),
+        expires_at=datetime.utcnow() + timedelta(minutes=settings.otp_lifetime_minutes),
+    )
+    db.add(otp_record)
+    db.flush()
+    return code
+
+
+def _send_google_otp(db: Session, user: Farmer) -> None:
+    if not user.email:
+        raise HTTPException(400, "A verified email address is required before OTP verification")
+    last_recent = db.scalar(
+        select(EmailOTP)
+        .where(EmailOTP.farmer_id == user.id, EmailOTP.purpose == "google_login")
+        .order_by(EmailOTP.created_at.desc())
+    )
+    if last_recent and last_recent.created_at + timedelta(seconds=settings.otp_resend_seconds) > datetime.utcnow():
+        raise HTTPException(429, "Please wait a moment before requesting a new OTP")
+    code = _create_otp_record(db, user)
+    _send_otp_email(user.email, code)
 
 
 def _issue_session(
@@ -179,45 +235,126 @@ def verify_google_credential(credential: str) -> dict:
 @router.post("/google")
 @limiter.limit("10/minute")
 def google_login(request: Request, body: GoogleLoginRequest, response: Response, db: Session = Depends(get_db)):
-    """Verify a Google ID token and sign in or create a farmer account."""
+    """Verify a Google ID token, send a secure OTP to the user email, and require verification before session creation."""
     claims = verify_google_credential(body.credential)
     email = str(claims["email"]).strip().lower()
+    name = str(claims.get("name") or email.split("@", 1)[0]).strip()[:120]
+    google_id = str(claims.get("sub") or "")
+    profile_picture = claims.get("picture")
+
     user = db.scalar(select(Farmer).where(func.lower(Farmer.email) == email))
-    if user:
-        access_token = _issue_session(db, user, response, "auth.google_login")
-        log.info("google_login user_id=%s", user.id)
-        return _response({
-            "access_token": access_token,
-            "token_type": "bearer",
-            "user": CurrentUser.model_validate(user),
-        }, "Google login successful")
+    if not user:
+        unique_phone = f"+1555{secrets.token_hex(5)}"[:20]
+        user = Farmer(
+            name=name,
+            phone=unique_phone,
+            mobile_number=unique_phone,
+            email=email,
+            google_id=google_id or None,
+            profile_picture=profile_picture,
+            password_hash=hash_password(secrets.token_urlsafe(48)),
+            role="farmer",
+            email_verified=False,
+            account_status="pending_otp",
+        )
+        db.add(user)
+        db.flush()
+    else:
+        if google_id:
+            user.google_id = google_id
+        if profile_picture:
+            user.profile_picture = profile_picture
+        if user.name != name:
+            user.name = name
+        if user.email_verified is False and not user.phone:
+            user.phone = f"+1555{secrets.token_hex(5)}"[:20]
+            user.mobile_number = user.phone
+        user.account_status = user.account_status if user.account_status else "active"
+        db.flush()
 
-    if not body.phone:
-        return _response({
-            "phone_required": True,
+    try:
+        _send_google_otp(db, user)
+    except HTTPException:
+        raise
+    db.commit()
+    log.info("google_otp_sent user_id=%s email=%s", user.id, email)
+    return _response(
+        {
+            "requires_otp": True,
+            "phone_required": False,
             "email": email,
-            "name": claims.get("name", email.split("@", 1)[0]),
-        }, "Add a phone number to finish creating your farmer account")
-    if db.scalar(select(Farmer).where(Farmer.phone == body.phone)):
-        raise HTTPException(409, "Phone already registered to another account")
-
-    user = Farmer(
-        name=str(claims.get("name") or email.split("@", 1)[0])[:120],
-        phone=body.phone,
-        email=email,
-        password_hash=hash_password(secrets.token_urlsafe(48)),
-        role="farmer",
+            "name": user.name,
+            "message": "Verification code sent to your email.",
+        },
+        "Google account verified. Enter the OTP sent to your email.",
     )
-    db.add(user)
-    db.flush()
-    access_token = _issue_session(db, user, response, "auth.google_register")
-    db.refresh(user)
-    log.info("google_register user_id=%s", user.id)
+
+
+@router.post("/google/otp/verify")
+@limiter.limit("20/minute")
+def verify_google_otp(request: Request, body: dict, response: Response, db: Session = Depends(get_db)):
+    """Validate a Google-sign-in OTP and create a refresh-backed authenticated session."""
+    email = str(body.get("email", "")).strip().lower()
+    otp = str(body.get("otp", "")).strip()
+    if not email or not otp:
+        raise HTTPException(400, "Email and OTP are required")
+
+    user = db.scalar(select(Farmer).where(func.lower(Farmer.email) == email))
+    if not user:
+        raise HTTPException(401, "Google sign-in session is invalid or expired")
+
+    otp_record = db.scalar(
+        select(EmailOTP)
+        .where(EmailOTP.farmer_id == user.id, EmailOTP.purpose == "google_login")
+        .order_by(EmailOTP.created_at.desc())
+    )
+    if not otp_record or otp_record.used_at is not None:
+        raise HTTPException(401, "The verification code has already been used or is no longer valid")
+    if otp_record.expires_at <= datetime.utcnow():
+        otp_record.used_at = datetime.utcnow()
+        db.commit()
+        raise HTTPException(401, "The verification code has expired")
+
+    if otp_record.attempts >= settings.otp_max_attempts:
+        otp_record.used_at = datetime.utcnow()
+        db.commit()
+        raise HTTPException(401, "Too many incorrect attempts. Request a new verification code.")
+
+    if _hash_otp(otp) != otp_record.code_hash:
+        otp_record.attempts += 1
+        db.commit()
+        remaining_attempts = max(settings.otp_max_attempts - otp_record.attempts, 0)
+        if remaining_attempts <= 0:
+            raise HTTPException(401, "Too many incorrect attempts. Request a new verification code.")
+        raise HTTPException(401, f"Incorrect verification code. {remaining_attempts} attempts remaining")
+
+    otp_record.used_at = datetime.utcnow()
+    user.email_verified = True
+    user.account_status = "active"
+    user.last_login = datetime.utcnow()
+    access_token = _issue_session(db, user, response, "auth.google_otp_verify")
+    db.commit()
+    log.info("google_otp_verified user_id=%s", user.id)
     return _response({
         "access_token": access_token,
         "token_type": "bearer",
         "user": CurrentUser.model_validate(user),
-    }, "Google account created")
+    }, "Google authentication verified")
+
+
+@router.post("/google/otp/resend")
+@limiter.limit("5/minute")
+def resend_google_otp(request: Request, body: dict, db: Session = Depends(get_db), response: Response = None):
+    """Send another one-time verification code to the same Gmail account."""
+    email = str(body.get("email", "")).strip().lower()
+    if not email:
+        raise HTTPException(400, "Email is required")
+    user = db.scalar(select(Farmer).where(func.lower(Farmer.email) == email))
+    if not user:
+        raise HTTPException(404, "No active FarmWise account was found for this email")
+    _send_google_otp(db, user)
+    db.commit()
+    return _response({"email": email}, "A new verification code has been sent")
 
 
 @router.post("/refresh")

@@ -8,7 +8,11 @@ class Farmer(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(120))
     phone: Mapped[str] = mapped_column(String(20), unique=True, index=True)
+    mobile_number: Mapped[str | None] = mapped_column(String(20), nullable=True, unique=True, index=True)
     email: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True)
+    google_id: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True, index=True)
+    profile_picture: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255))
     role: Mapped[str] = mapped_column(String(20), default="farmer")
     language: Mapped[str] = mapped_column(String(10), default="en")
@@ -17,6 +21,8 @@ class Farmer(Base):
     location_name: Mapped[str | None] = mapped_column(String(160))
     latitude: Mapped[float | None] = mapped_column(Float)
     longitude: Mapped[float | None] = mapped_column(Float)
+    last_login: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    account_status: Mapped[str] = mapped_column(String(30), default="active", index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     farms: Mapped[list["Farm"]] = relationship(back_populates="farmer", cascade="all, delete-orphan")
@@ -183,6 +189,17 @@ class ChatMessage(Base):
     model_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     conversation: Mapped[ChatConversation] = relationship(back_populates="messages")
+
+class EmailOTP(Base):
+    __tablename__ = "email_otps"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    farmer_id: Mapped[int] = mapped_column(ForeignKey("farmers.id", ondelete="CASCADE"), index=True)
+    purpose: Mapped[str] = mapped_column(String(30), default="google_login", index=True)
+    code_hash: Mapped[str] = mapped_column(String(128), index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, index=True)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 class RefreshToken(Base):
     """Hashed rotating refresh token record; raw tokens never enter the database."""

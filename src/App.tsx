@@ -4,6 +4,7 @@ import {
   api,
   clearToken,
   getToken,
+  restoreSession,
   saveToken,
   type ApiCrop,
   type BuyerProfile,
@@ -209,6 +210,7 @@ function App() {
   const [active, setActive] = useState<Module>("Dashboard"),
     [menuOpen, setMenuOpen] = useState(false);
   const [pendingContact, setPendingContact] = useState<{ listingId?: number; buyerUserId?: number } | null>(null);
+  const [otpPending, setOtpPending] = useState<{ email: string; name: string } | null>(null);
   const [toast, setToast] = useState(""),
     [plannerLoading, setPlannerLoading] = useState(false),
     [searchOpen, setSearchOpen] = useState(false),
@@ -260,7 +262,7 @@ function App() {
     localStorage.setItem("farmwise_language", accountLanguage);
     const farms = await api.farms(token).catch(() => []);
     setFarm(farms[0] ?? null);
-    setActive(currentUser.role === "buyer" ? "Crop Marketplace" : "Dashboard");
+    setActive("Dashboard");
     setAuthenticated(true);
     if (farms[0]) {
       setSoil(farms[0].soil_type);
@@ -283,17 +285,21 @@ function App() {
     if (!token) throw new Error("Your session has expired. Please log in again.");
     await api.createHarvest(payload, token);
     notify("Crop media shared with buyers.");
-    setActive(user?.role === "buyer" ? "Crop Marketplace" : "Buyers & Brokers");
+    setActive("Crop Marketplace");
   };
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      setAuthLoading(false);
-      return;
-    }
-    loadAccount(token)
-      .catch(() => clearToken())
-      .finally(() => setAuthLoading(false));
+    const bootstrapSession = async () => {
+      const token = getToken() ?? (await restoreSession());
+      if (!token) {
+        setAuthLoading(false);
+        return;
+      }
+      saveToken(token);
+      loadAccount(token)
+        .catch(() => clearToken())
+        .finally(() => setAuthLoading(false));
+    };
+    void bootstrapSession();
   }, []);
   const rankedCrops = useMemo(
     () =>
@@ -362,30 +368,52 @@ function App() {
   if (!authenticated)
     return (
       <LanguageContext.Provider value={{ language, setLanguage: changeLanguage, dynamicTranslations }}>
-      <Landing
-        authMode={authMode}
-        setAuthMode={setAuthMode}
-        onLogin={async (identifier, password) => {
-          const result = await api.login(identifier, password);
-          saveToken(result.access_token);
-          await loadAccount(result.access_token);
-          setAuthMode(null);
-        }}
-        onSignup={async (payload) => {
-          const result = await api.register(payload);
-          saveToken(result.access_token);
-          await loadAccount(result.access_token);
-          setAuthMode(null);
-        }}
-        onGoogle={async (credential, phone) => {
-          const result = await api.googleLogin(credential, phone);
-          if ("phone_required" in result) return result;
-          saveToken(result.access_token);
-          await loadAccount(result.access_token);
-          setAuthMode(null);
-          return result;
-        }}
-      />
+      {otpPending ? (
+        <OTPVerificationScreen
+          email={otpPending.email}
+          name={otpPending.name}
+          onVerify={async (otp) => {
+            const result = await api.googleOtpVerify(otpPending.email, otp);
+            saveToken(result.access_token);
+            await loadAccount(result.access_token);
+            setOtpPending(null);
+          }}
+          onResend={async () => {
+            const result = await api.googleOtpResend(otpPending.email);
+            notify(result.message ?? "A new verification code has been sent.");
+          }}
+          onCancel={() => setOtpPending(null)}
+        />
+      ) : (
+        <Landing
+          authMode={authMode}
+          setAuthMode={setAuthMode}
+          onLogin={async (identifier, password) => {
+            const result = await api.login(identifier, password);
+            saveToken(result.access_token);
+            await loadAccount(result.access_token);
+            setAuthMode(null);
+          }}
+          onSignup={async (payload) => {
+            const result = await api.register(payload);
+            saveToken(result.access_token);
+            await loadAccount(result.access_token);
+            setAuthMode(null);
+          }}
+          onGoogle={async (credential, phone) => {
+            const result = await api.googleLogin(credential, phone);
+            if ("requires_otp" in result) {
+              setOtpPending({ email: result.email, name: result.name });
+              setAuthMode(null);
+              return result;
+            }
+            saveToken(result.access_token);
+            await loadAccount(result.access_token);
+            setAuthMode(null);
+            return result;
+          }}
+        />
+      )}
       </LanguageContext.Provider>
     );
   return (
@@ -412,9 +440,7 @@ function App() {
         </div>
         <p className="nav-caption">WORKSPACE</p>
         <nav>
-          {navItems.filter((item) => user?.role === "buyer"
-            ? ["Crop Marketplace", "Online Marketplaces", "Messages", "Profile"].includes(item.label)
-            : item.label !== "Crop Marketplace").map((item) => (
+          {navItems.map((item) => (
             <button
               key={item.label}
               className={active === item.label ? "app-nav active" : "app-nav"}
@@ -594,7 +620,7 @@ function App() {
           {active === "Crop Guide" && <AgricultureGuide />}
           {active === "Farm Budget & Profit" && <FinancialForecastView token={getToken()} farm={farm} />}
           {active === "Analytics" && <Analytics />}
-          {active === "Profile" && <UserProfile user={user} onSaved={(updated) => { setUser(updated); setActive(updated.role === "buyer" ? "Crop Marketplace" : "Dashboard"); notify("Profile changes saved."); }} />}
+          {active === "Profile" && <UserProfile user={user} onSaved={(updated) => { setUser(updated); setActive("Dashboard"); notify("Profile changes saved."); }} />}
         </div>
       </main>
       {toast && (
@@ -603,8 +629,8 @@ function App() {
           {toast}
         </div>
       )}
-      {searchOpen && <SearchPanel token={getToken()} onClose={() => setSearchOpen(false)} onNavigate={(module) => { setActive(user?.role === "buyer" ? "Crop Marketplace" : module); setSearchOpen(false); }} />}
-      {notificationsOpen && <NotificationsPanel token={getToken()} onClose={() => setNotificationsOpen(false)} onNavigate={(module) => { setActive(user?.role === "buyer" ? "Crop Marketplace" : module); setNotificationsOpen(false); }} />}
+      {searchOpen && <SearchPanel token={getToken()} onClose={() => setSearchOpen(false)} onNavigate={(module) => { setActive(module); setSearchOpen(false); }} />}
+      {notificationsOpen && <NotificationsPanel token={getToken()} onClose={() => setNotificationsOpen(false)} onNavigate={(module) => { setActive(module); setNotificationsOpen(false); }} />}
     </div></LanguageContext.Provider>
   );
 }
@@ -756,6 +782,100 @@ function NotificationsPanel({
           </button>
         ))}
       </section>
+    </div>
+  );
+}
+
+function OTPVerificationScreen({
+  email,
+  name,
+  onVerify,
+  onResend,
+  onCancel,
+}: {
+  email: string;
+  name: string;
+  onVerify: (otp: string) => Promise<void>;
+  onResend: () => Promise<void>;
+  onCancel: () => void;
+}) {
+  const [otp, setOtp] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [cooldown, setCooldown] = useState(45);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = window.setTimeout(() => setCooldown((value) => Math.max(0, value - 1)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [cooldown]);
+
+  const handleVerify = async () => {
+    const normalized = otp.replace(/\D/g, "");
+    if (normalized.length !== 6) {
+      setError("Enter the 6-digit verification code sent to your email.");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      await onVerify(normalized);
+    } catch (verificationError) {
+      setError(verificationError instanceof Error ? verificationError.message : "The verification code is invalid or expired.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (cooldown > 0) return;
+    setBusy(true);
+    setError("");
+    try {
+      await onResend();
+      setOtp("");
+      setCooldown(45);
+    } catch (resendError) {
+      setError(resendError instanceof Error ? resendError.message : "We could not send a new code yet.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="landing" style={{ display: "grid", placeItems: "center", minHeight: "100vh", padding: "2rem 1rem" }}>
+      <div className="auth-modal" style={{ maxWidth: 460, width: "100%", padding: "2rem" }}>
+        <button className="modal-close" onClick={onCancel} aria-label="Cancel OTP verification">×</button>
+        <span className="modal-kicker">FARMWISE AI</span>
+        <h2>Verify your email</h2>
+        <p>Hi {name}. We sent a secure 6-digit code to {email}.</p>
+        <label>
+          VERIFICATION CODE
+          <input
+            value={otp}
+            onChange={(event) => setOtp(event.target.value.slice(0, 6))}
+            inputMode="numeric"
+            pattern="[0-9]*"
+            placeholder="123456"
+            aria-label="OTP verification code"
+          />
+        </label>
+        {error && <div className="auth-error">{error}</div>}
+        <button className="auth-submit" onClick={() => void handleVerify()} disabled={busy}>
+          {busy ? "Verifying…" : "Confirm code"} <span>→</span>
+        </button>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", marginTop: "1rem" }}>
+          <small className="auth-note" style={{ margin: 0 }}>Code expires in 5 minutes.</small>
+          <button
+            type="button"
+            onClick={() => void handleResend()}
+            disabled={cooldown > 0 || busy}
+            style={{ background: "transparent", border: "none", color: "#1d7a4c", fontWeight: 700, cursor: cooldown > 0 || busy ? "not-allowed" : "pointer" }}
+          >
+            {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -926,8 +1046,6 @@ function AuthModal({
   const [role, setRole] = useState("farmer");
   const [error, setError] = useState("");
   const [googleCredential, setGoogleCredential] = useState("");
-  const [googlePhone, setGooglePhone] = useState("");
-  const [googlePhoneRequired, setGooglePhoneRequired] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
   const googleButtonRef = useRef<HTMLDivElement>(null);
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() || DEFAULT_GOOGLE_CLIENT_ID;
@@ -943,7 +1061,9 @@ function AuthModal({
       setGoogleCredential(response.credential);
       void onGoogleRef.current(response.credential)
         .then((result) => {
-          if ("phone_required" in result) setGooglePhoneRequired(true);
+          if ("requires_otp" in result) {
+            return;
+          }
         })
         .catch((googleError) => setError(googleError instanceof Error ? googleError.message : "Google sign-in failed."))
         .finally(() => setGoogleBusy(false));
@@ -990,19 +1110,6 @@ function AuthModal({
       existing?.removeEventListener("load", initializeGoogle);
     };
   }, [googleClientId]);
-
-  const finishGoogleSignup = async () => {
-    setError("");
-    setGoogleBusy(true);
-    try {
-      const result = await onGoogle(googleCredential, googlePhone);
-      if ("phone_required" in result) setGooglePhoneRequired(true);
-    } catch (googleError) {
-      setError(googleError instanceof Error ? googleError.message : "Google sign-in failed.");
-    } finally {
-      setGoogleBusy(false);
-    }
-  };
 
   const submit = async () => {
     try {
@@ -1057,19 +1164,10 @@ function AuthModal({
           {mode === "login" ? "Log in to workspace" : "Create my account"}{" "}
           <span>→</span>
         </button>
-        {googlePhoneRequired && (
-          <div className="google-phone-step">
-            <p>Google verified {googleCredential ? "your email" : "your account"}. Add a mobile number to finish your farmer profile.</p>
-            <label>MOBILE NUMBER<input value={googlePhone} onChange={(event) => setGooglePhone(event.target.value)} placeholder="+91 98765 43210" /></label>
-            <button className="auth-submit" disabled={googleBusy || googlePhone.trim().length < 10} onClick={() => void finishGoogleSignup()}>
-              {googleBusy ? "Creating account…" : "Finish Google sign-in"} <span>→</span>
-            </button>
-          </div>
-        )}
         {googleClientId
           ? <div className="google-signin-control" ref={googleButtonRef} />
           : <button className="google-button" disabled title="Google sign-in needs a configured OAuth client ID">G <span>Google sign-in needs setup</span></button>}
-        {googleBusy && !googlePhoneRequired && <small className="google-status">Verifying your Google account…</small>}
+        {googleBusy && <small className="google-status">Verifying your Google account…</small>}
         <div className="auth-switch">
           {mode === "login" ? "New to FarmWise?" : "Already have an account?"}{" "}
           <button

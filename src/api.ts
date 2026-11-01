@@ -178,6 +178,37 @@ export type AccountAlert = {
   message: string;
 };
 
+export type MarketRadarResult = {
+  products: string[];
+  districts: string[];
+  market_rows: Array<{
+    market_id: number;
+    product: string;
+    market_name: string;
+    district: string;
+    location_name: string;
+    market_date: string;
+    price_per_kg: number;
+    min_price: number;
+    max_price: number;
+    modal_price: number;
+    price_per_quintal: number;
+    market_arrivals: number;
+    source: string;
+    demand_level: string;
+    estimated_net_per_kg: number;
+    latest_update: string;
+  }>;
+  recommendations: Array<{
+    product: string;
+    recommended_market: string;
+    district: string;
+    estimated_price_per_kg: number;
+    estimated_net_per_kg: number;
+    source: string;
+  }>;
+};
+
 export type GoogleLoginResult =
   | { phone_required: true; email: string; name: string }
   | { access_token: string; token_type: string; user: User };
@@ -302,6 +333,13 @@ export const api = {
     request<Array<{ id: number; name: string; location_name: string }>>(
       "/markets",
     ),
+  marketRadar: (filters: Partial<Record<"product" | "district" | "market" | "market_date", string>> & { min_price?: number; max_price?: number } = {}) => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") params.set(key, String(value));
+    });
+    return request<MarketRadarResult>(`/markets/radar${params.toString() ? `?${params.toString()}` : ""}`);
+  },
   buyers: () => request<BuyerProfile[]>("/buyers"),
   directory: () => request<DirectoryProfile[]>("/directory"),
   getInterfaceTranslations: (language: string) =>

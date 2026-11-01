@@ -14,6 +14,7 @@ import {
   type FinancialForecast,
   type Farm,
   type HarvestPayload,
+  type MarketRadarResult,
   type User,
 } from "./api";
 import { agricultureGuide } from "./agricultureGuide";
@@ -1548,32 +1549,172 @@ function CropPlanner({
 }
 
 function MarketView() {
-  const [marketLocations, setMarketLocations] = useState<Array<{ id: number; name: string; location_name: string }>>([]);
+  const [marketData, setMarketData] = useState<MarketRadarResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [product, setProduct] = useState("");
+  const [district, setDistrict] = useState("");
+  const [marketName, setMarketName] = useState("");
+  const [marketDate, setMarketDate] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
 
   useEffect(() => {
     let cancelled = false;
-    api.markets()
-      .then((result) => { if (!cancelled) setMarketLocations(result); })
-      .catch((loadError) => { if (!cancelled) setError(loadError instanceof Error ? loadError.message : "Could not load market locations."); })
-      .finally(() => { if (!cancelled) setLoading(false); });
+    setLoading(true);
+    api.marketRadar({
+      product: product || undefined,
+      district: district || undefined,
+      market: marketName || undefined,
+      market_date: marketDate || undefined,
+      min_price: minPrice ? Number(minPrice) : undefined,
+      max_price: maxPrice ? Number(maxPrice) : undefined,
+    })
+      .then((result) => {
+        if (!cancelled) setMarketData(result);
+      })
+      .catch((loadError) => {
+        if (!cancelled) {
+          setError(loadError instanceof Error ? loadError.message : "Could not load Karnataka market radar data.");
+          setMarketData(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
     return () => { cancelled = true; };
-  }, []);
+  }, [product, district, marketName, marketDate, minPrice, maxPrice]);
+
+  const rows = marketData?.market_rows ?? [];
+  const recommendations = marketData?.recommendations ?? [];
+  const topRecommendation = recommendations[0];
 
   return (
     <>
-      <PageHeading eyebrow="MARKET INTELLIGENCE" title="Markets from the FarmWise service" text="Browse registered market locations. Price comparisons will be available when current price and transport data is published." />
+      <PageHeading
+        eyebrow="KARNATAKA MARKET RADAR"
+        title="Find the best place to sell your crop."
+        text="Compare registered APMC and market price snapshots across Karnataka. Use the filters below to narrow by product, district, market, date, and price range."
+      />
       {error && <div className="marketplace-error">{error}</div>}
-      {loading ? <div className="panel empty-state">Loading market locations…</div> : marketLocations.length ? (
+      <section className="panel">
+        <div className="marketplace-section-heading">
+          <div>
+            <span className="eyebrow green">FILTERS</span>
+            <h2>Market intelligence</h2>
+          </div>
+          <span className="marketplace-count">{rows.length} price rows</span>
+        </div>
+        <div className="form-grid">
+          <label>
+            Product
+            <select value={product} onChange={(event) => setProduct(event.target.value)}>
+              <option value="">All products</option>
+              {(marketData?.products ?? []).map((entry) => (
+                <option key={entry} value={entry}>{entry}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            District
+            <select value={district} onChange={(event) => setDistrict(event.target.value)}>
+              <option value="">All districts</option>
+              {(marketData?.districts ?? []).map((entry) => (
+                <option key={entry} value={entry}>{entry}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Market
+            <input value={marketName} onChange={(event) => setMarketName(event.target.value)} placeholder="e.g. Mysuru APMC" />
+          </label>
+          <label>
+            Date
+            <input type="date" value={marketDate} onChange={(event) => setMarketDate(event.target.value)} />
+          </label>
+          <label>
+            Min ₹/kg
+            <input type="number" value={minPrice} min="0" step="0.1" onChange={(event) => setMinPrice(event.target.value)} placeholder="0" />
+          </label>
+          <label>
+            Max ₹/kg
+            <input type="number" value={maxPrice} min="0" step="0.1" onChange={(event) => setMaxPrice(event.target.value)} placeholder="100" />
+          </label>
+        </div>
+      </section>
+
+      {topRecommendation && (
+        <section className="panel">
+          <div className="marketplace-section-heading">
+            <div>
+              <span className="eyebrow green">BEST OPPORTUNITY</span>
+              <h2>{topRecommendation.product}</h2>
+            </div>
+            <span className="data-tag">ESTIMATED NET</span>
+          </div>
+          <div className="forecast-metrics">
+            <span><small>RECOMMENDED MARKET</small><b>{topRecommendation.recommended_market}</b></span>
+            <span><small>DISTRICT</small><b>{topRecommendation.district}</b></span>
+            <span><small>PRICE</small><b>₹{topRecommendation.estimated_price_per_kg.toFixed(2)}/kg</b></span>
+            <span><small>ESTIMATED NET</small><b>₹{topRecommendation.estimated_net_per_kg.toFixed(2)}/kg</b></span>
+          </div>
+        </section>
+      )}
+
+      {loading ? (
+        <div className="panel empty-state">Loading market radar data…</div>
+      ) : rows.length ? (
         <div className="market-cards">
-          {marketLocations.map((market) => (
-            <article className="market-card" key={market.id}>
-              <div className="market-card-main"><span className="eyebrow">REGISTERED MARKET</span><h3>{market.name}</h3><p>{market.location_name}</p></div>
+          {rows.map((market) => (
+            <article className="market-card panel" key={`${market.market_id}-${market.product}-${market.market_date}`}>
+              <div className="market-card-main">
+                <span className="eyebrow">{market.product}</span>
+                <h3>{market.market_name}</h3>
+                <p>{market.district} · {market.location_name}</p>
+              </div>
+              <div className="crop-listing-facts">
+                <span><small>MIN</small><b>₹{market.min_price.toFixed(2)}/kg</b></span>
+                <span><small>MAX</small><b>₹{market.max_price.toFixed(2)}/kg</b></span>
+                <span><small>MODAL</small><b>₹{market.modal_price.toFixed(2)}/kg</b></span>
+                <span><small>ARRIVALS</small><b>{market.market_arrivals}</b></span>
+              </div>
+              <div className="market-card-main">
+                <p>Last update: {market.market_date}</p>
+                <p>Source: {market.source}</p>
+                <p>Demand: {market.demand_level}</p>
+                <p>Estimated net: ₹{market.estimated_net_per_kg.toFixed(2)}/kg</p>
+              </div>
             </article>
           ))}
         </div>
-      ) : !error ? <div className="panel empty-state"><strong>No market locations are registered yet.</strong><p>Market locations will appear here when they are added to the FarmWise service.</p></div> : null}
+      ) : !error ? (
+        <div className="panel empty-state">
+          <strong>No market price rows match this filter set.</strong>
+          <p>Try removing a filter or choosing a broader product or district.</p>
+        </div>
+      ) : null}
+      {recommendations.length > 0 && (
+        <section className="panel">
+          <div className="marketplace-section-heading">
+            <div>
+              <span className="eyebrow green">TOP RECOMMENDATIONS</span>
+              <h2>Best market by product</h2>
+            </div>
+          </div>
+          <div className="people-directory-grid">
+            {recommendations.map((item) => (
+              <article className="person-card" key={item.product}>
+                <div>
+                  <span className="person-role">{item.product}</span>
+                  <h3>{item.recommended_market}</h3>
+                  <p>{item.district}</p>
+                  <small>₹{item.estimated_price_per_kg.toFixed(2)}/kg · net ₹{item.estimated_net_per_kg.toFixed(2)}/kg</small>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
     </>
   );
 }

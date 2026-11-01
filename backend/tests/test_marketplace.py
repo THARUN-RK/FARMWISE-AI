@@ -218,6 +218,21 @@ def test_conversation_contact_and_location_require_each_party_consent():
     assert buyer_view["other_party"]["latitude"] == 12.2958
 
 
+def test_market_radar_returns_filtered_karnataka_price_data():
+    response = client.get(
+        "/api/v1/markets/radar",
+        params={"product": "Tomato", "district": "Karnataka"},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["success"] is True
+    data = payload["data"]
+    assert "Tomato" in data["products"]
+    assert data["market_rows"]
+    assert any(item["product"] == "Tomato" for item in data["market_rows"])
+    assert data["recommendations"]
+    assert any(item["product"] == "Tomato" for item in data["recommendations"])958
+
 def test_farmer_can_join_buyer_directory_by_changing_account_type():
     suffix = uuid4().hex[:8]
     registration = client.post(

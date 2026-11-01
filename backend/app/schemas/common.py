@@ -170,6 +170,34 @@ class ConversationReply(BaseModel):
     share_my_contact: bool | None = None
     share_my_location: bool | None = None
 
+class ContactDetailsRequest(BaseModel):
+    phone: str | None = None
+    alternate_phone: str | None = None
+    email: str | None = None
+    whatsapp: str | None = None
+    address_line1: str | None = None
+    address_line2: str | None = None
+    city: str | None = None
+    district: str | None = None
+    state: str | None = None
+    pincode: str | None = None
+    preferred_contact_method: Literal["phone", "whatsapp", "email"] = "phone"
+    is_primary: bool = True
+
+    @field_validator("phone", "alternate_phone", "whatsapp", mode="before")
+    @classmethod
+    def normalize_phone(cls, value):
+        if value is None:
+            return value
+        return _normalize_phone(value) if isinstance(value, str) else value
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def normalize_email(cls, value):
+        if isinstance(value, str):
+            return value.strip().lower() or None
+        return value
+
 class CurrentUser(BaseModel):
     id: int
     name: str

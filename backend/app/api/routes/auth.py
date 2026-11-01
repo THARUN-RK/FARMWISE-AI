@@ -21,9 +21,10 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.limiter import limiter
 from app.core.security import create_access_token, hash_password, hash_refresh_token, verify_password
-from app.models.entities import Farmer, RefreshToken
+from app.models.entities import ContactDetail, Farmer, RefreshToken
 from app.services.audit import record_audit_event
 from app.schemas.common import (
+    ContactDetailsRequest,
     CurrentUser,
     GoogleLoginRequest,
     LoginRequest,
@@ -341,6 +342,100 @@ def create_profile(
 def get_profile(user: Farmer = Depends(current_user)):
     """Get the current user's profile."""
     return _response(CurrentUser.model_validate(user))
+
+
+@router.get("/contact-details")
+def get_contact_details(user: Farmer = Depends(current_user), db: Session = Depends(get_db)):
+    """Fetch the current user's saved contact details."""
+    query = select(ContactDetail).where(ContactDetail.farmer_id == user.id)
+    if user.role == "buyer":
+        query = select(ContactDetail).where(ContactDetail.buyer_id == user.id)
+    contact = db.scalar(query.order_by(ContactDetail.is_primary.desc(), ContactDetail.updated_at.desc(), ContactDetail.id.desc()))
+    if not contact:
+        return _response(None, "No contact details saved yet")
+    return _response({
+        "id": contact.id,
+        "phone": contact.phone,
+        "alternate_phone": contact.alternate_phone,
+        "email": contact.email,
+        "whatsapp": contact.whatsapp,
+        "address_line1": contact.address_line1,
+        "address_line2": contact.address_line2,
+        "city": contact.city,
+        "district": contact.district,
+        "state": contact.state,
+        "pincode": contact.pincode,
+        "preferred_contact_method": contact.preferred_contact_method,
+        "is_primary": contact.is_primary,
+    }, "Contact details loaded")
+
+
+@router.post("/contact-details")
+def save_contact_details(
+    body: ContactDetailsRequest,
+    user: Farmer = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    """Save or update the current user's contact details."""
+    if body.phone is None and body.email is None and body.whatsapp is None and body.address_line1 is None:
+        raise HTTPException(400, "At least one contact field is required")
+
+    where_clause = (ContactDetail.farmer_id == user.id) if user.role != "buyer" else (ContactDetail.buyer_id == user.id)
+    contact = db.scalar(select(ContactDetail).where(where_clause).order_by(ContactDetail.is_primary.desc(), ContactDetail.updated_at.desc(), ContactDetail.id.desc()))
+
+    if contact is None:
+        contact = ContactDetail(
+            farmer_id=user.id if user.role != "buyer" else None,
+            buyer_id=user.id if user.role == "buyer" else None,
+            preferred_contact_method=body.preferred_contact_method,
+            is_primary=body.is_primary,
+        )
+        db.add(contact)
+    else:
+        contact.preferred_contact_method = body.preferred_contact_method
+        contact.is_primary = body.is_primary
+
+    contact.phone = body.phone or contact.phone
+    contact.alternate_phone = body.alternate_phone or contact.alternate_phone
+    contact.email = body.email or contact.email
+    contact.whatsapp = body.whatsapp or contact.whatsapp
+    contact.address_line1 = body.address_line1 or contact.address_line1
+    contact.address_line2 = body.address_line2 or contact.address_line2
+    contact.city = body.city or contact.city
+    contact.district = body.district or contact.district
+    contact.state = body.state or contact.state
+    contact.pincode = body.pincode or contact.pincode
+
+    if body.is_primary and user.role != "buyer":
+        db.execute(
+            update(ContactDetail)
+            .where(ContactDetail.farmer_id == user.id, ContactDetail.id != contact.id)
+            .values(is_primary=False)
+        )
+    elif body.is_primary and user.role == "buyer":
+        db.execute(
+            update(ContactDetail)
+            .where(ContactDetail.buyer_id == user.id, ContactDetail.id != contact.id)
+            .values(is_primary=False)
+        )
+
+    db.commit()
+    db.refresh(contact)
+    return _response({
+        "id": contact.id,
+        "phone": contact.phone,
+        "alternate_phone": contact.alternate_phone,
+        "email": contact.email,
+        "whatsapp": contact.whatsapp,
+        "address_line1": contact.address_line1,
+        "address_line2": contact.address_line2,
+        "city": contact.city,
+        "district": contact.district,
+        "state": contact.state,
+        "pincode": contact.pincode,
+        "preferred_contact_method": contact.preferred_contact_method,
+        "is_primary": contact.is_primary,
+    }, "Contact details saved")
 
 
 @router.put("/profile")

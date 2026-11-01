@@ -20,11 +20,41 @@ class Farmer(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     farms: Mapped[list["Farm"]] = relationship(back_populates="farmer", cascade="all, delete-orphan")
+    contacts: Mapped[list["ContactDetail"]] = relationship(back_populates="farmer", cascade="all, delete-orphan")
     farm_profile: Mapped["FarmProfile | None"] = relationship(
         back_populates="farmer",
         uselist=False,
         cascade="all, delete-orphan",
     )
+
+class ContactDetail(Base):
+    __tablename__ = "contact_details"
+    __table_args__ = (
+        UniqueConstraint("farmer_id", "is_primary", name="uq_contact_details_farmer_primary"),
+        UniqueConstraint("buyer_id", "is_primary", name="uq_contact_details_buyer_primary"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    farmer_id: Mapped[int | None] = mapped_column(ForeignKey("farmers.id", ondelete="CASCADE"), nullable=True, index=True)
+    buyer_id: Mapped[int | None] = mapped_column(ForeignKey("buyers.id", ondelete="CASCADE"), nullable=True, index=True)
+    phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    alternate_phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    whatsapp: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    address_line1: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    address_line2: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    city: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    district: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    state: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    pincode: Mapped[str | None] = mapped_column(String(12), nullable=True)
+    preferred_contact_method: Mapped[str] = mapped_column(String(20), default="phone")
+    is_primary: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    farmer: Mapped[Farmer | None] = relationship(back_populates="contacts")
+    buyer: Mapped["Buyer | None"] = relationship(back_populates="contacts")
+
 
 class FarmProfile(Base):
     __tablename__ = "farm_profiles"
@@ -157,6 +187,7 @@ class Buyer(Base):
     verification_fields: Mapped[str] = mapped_column(String(255), default="")
     rating: Mapped[float] = mapped_column(Float, default=0)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
+    contacts: Mapped[list["ContactDetail"]] = relationship(back_populates="buyer", cascade="all, delete-orphan")
 
 class BuyerRequirement(Base):
     __tablename__ = "buyer_requirements"
